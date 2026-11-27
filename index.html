@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia de Prompts — Laboratório Prático de IA</title>
+    <!-- Carregando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carregando Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Barra de rolagem suave para navegação das questões */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- =========================================================================
+         TELA DE INÍCIO (BOAS-VINDAS / IDENTIFICAÇÃO DO ALUNO + BOTÃO ADM)
+         ========================================================================= -->
+    <section id="welcomeScreen" class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden">
+        <!-- Elementos decorativos de fundo -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Barra Superior da Tela Inicial -->
+        <div class="max-w-6xl w-full mx-auto flex items-center justify-between relative z-10 pt-2">
+            <div class="flex items-center gap-2.5 text-white">
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-600/30">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i>
+                </div>
+                <span class="font-bold tracking-tight text-base sm:text-lg">Academia de Prompts</span>
+            </div>
+
+            <!-- Botão Discreto Área do Professor (ADM) -->
+            <button onclick="openAdminLoginModal()" class="bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white border border-white/15 backdrop-blur-md text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl flex items-center gap-2 transition cursor-pointer">
+                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                <span>Área do Professor (ADM)</span>
+            </button>
+        </div>
+
+        <!-- Cartão Central de Acesso do Aluno -->
+        <div class="max-w-lg w-full mx-auto my-auto py-8 relative z-10">
+            <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 p-6 sm:p-10">
+                <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                    Laboratório Prático de IA
+                </div>
+
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+                    Academia de Prompts
+                </h1>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                    Pratique a criação de comandos inteligentes para Inteligência Artificial em <strong>15 desafios interativos</strong> e receba sua nota de 0 a 10 na hora!
+                </p>
+
+                <!-- Formulário de Entrada do Aluno -->
+                <form onsubmit="handleStudentStart(event)" class="space-y-4">
+                    <div>
+                        <label for="loginStudentName" class="block text-sm font-bold text-slate-700 mb-1.5">
+                            Nome Completo do(a) Aluno(a) <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="user" class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                            <input 
+                                type="text" 
+                                id="loginStudentName" 
+                                required
+                                placeholder="Ex: Ana Beatriz Silva"
+                                class="w-full rounded-xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 pl-11 pr-4 py-3 text-slate-900 font-medium placeholder-slate-400 transition outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="loginStudentClass" class="block text-sm font-bold text-slate-700 mb-1.5">
+                            Turma / Série <span class="text-slate-400 font-normal">(Opcional)</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="users" class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                            <input 
+                                type="text" 
+                                id="loginStudentClass" 
+                                placeholder="Ex: 9º Ano B / Turma Manhã"
+                                class="w-full rounded-xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 pl-11 pr-4 py-3 text-slate-900 font-medium placeholder-slate-400 transition outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Alerta de Erro no Login -->
+                    <div id="loginErrorMsg" class="hidden bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                        <span>Por favor, digite seu nome para iniciar a atividade.</span>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-base py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition cursor-pointer mt-2">
+                        <span>Iniciar Atividade</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </form>
+
+                <!-- Alunos recentes salvos neste computador (atalho rápido) -->
+                <div id="recentStudentsBox" class="hidden mt-6 pt-5 border-t border-slate-100">
+                    <span class="block text-xs font-semibold text-slate-500 mb-2.5">Continuar sessão salva neste computador:</span>
+                    <div id="recentStudentsList" class="flex flex-wrap gap-2">
+                        <!-- Chips gerados via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé da Tela Inicial -->
+        <div class="max-w-6xl w-full mx-auto text-center text-xs text-slate-400 relative z-10 pb-2">
+            Plataforma Educacional de Engenharia de Prompt • Correção Automática em Tempo Real
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         ÁREA DO ALUNO (CABEÇALHO + 15 QUESTÕES + FEEDBACK)
+         ========================================================================= -->
+    <div id="studentAppWrapper" class="hidden flex-col min-h-screen">
+        <!-- Cabeçalho Principal -->
+        <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 no-print">
+            <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                    <div class="flex items-center gap-2.5">
+                        <div class="bg-indigo-600 p-2 rounded-xl shadow-inner">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-amber-300"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg sm:text-xl tracking-tight leading-tight">Academia de Prompts</h1>
+                            <p class="text-xs text-slate-400">Laboratório Prático de Inteligência Artificial</p>
+                        </div>
+                    </div>
+                    <!-- Botões Mobile -->
+                    <div class="flex sm:hidden items-center gap-1.5">
+                        <button onclick="openAdminLoginModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold px-2.5 py-2 rounded-lg flex items-center gap-1 transition" title="Área ADM">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="showReportModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+                            <i data-lucide="award" class="w-4 h-4"></i> Boletim
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Identificação do Aluno Logado + Estatísticas Rápidas + Trocar Aluno / ADM -->
+                <div class="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+                    <!-- Badge do Aluno Atual -->
+                    <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 font-bold text-xs" id="headerStudentAvatar">
+                            AL
+                        </div>
+                        <div class="leading-tight">
+                            <span id="headerStudentNameDisplay" class="block text-xs sm:text-sm font-bold text-white truncate max-w-[140px] sm:max-w-[180px]">Aluno(a)</span>
+                            <span id="headerStudentClassDisplay" class="block text-[10px] text-slate-400">Turma Geral</span>
+                        </div>
+                        <button onclick="returnToWelcomeScreen()" title="Trocar Aluno ou Voltar ao Início" class="ml-1 text-slate-400 hover:text-white bg-slate-700/70 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition cursor-pointer">
+                            <i data-lucide="log-out" class="w-3 h-3"></i>
+                            <span>Trocar</span>
+                        </button>
+                    </div>
+
+                    <div class="hidden lg:flex items-center gap-4 bg-slate-800/80 border border-slate-700/80 px-4 py-1.5 rounded-xl">
+                        <div class="text-center">
+                            <span class="block text-[10px] uppercase tracking-wider text-slate-400">Respondidas</span>
+                            <span id="headerAnsweredCount" class="font-bold text-sm text-white">0/15</span>
+                        </div>
+                        <div class="h-6 w-px bg-slate-700"></div>
+                        <div class="text-center">
+                            <span class="block text-[10px] uppercase tracking-wider text-slate-400">Média Atual</span>
+                            <span id="headerAvgScore" class="font-bold text-sm text-emerald-400">0.0</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showReportModal()" class="hidden sm:flex bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl items-center gap-1.5 shadow-sm transition cursor-pointer">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                        <span>Boletim</span>
+                    </button>
+
+                    <button onclick="openAdminLoginModal()" class="hidden sm:flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl items-center gap-1.5 transition cursor-pointer" title="Acesso do Professor">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                        <span>ADM</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Navegação das 15 Questões -->
+            <div class="bg-slate-800/90 border-t border-slate-700/70">
+                <div class="max-w-6xl mx-auto px-4 py-2.5">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <span>Progresso da Aula (Selecione uma questão):</span>
+                        <span id="progressText" class="font-medium text-indigo-300">Questão 1 de 15</span>
+                    </div>
+                    <div id="questionNavGrid" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                        <!-- Botões 1 a 15 gerados via JS -->
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 sm:py-8 no-print">
+            <!-- Cartão do Desafio Atual -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden mb-6">
+                <!-- Cabeçalho do Card da Questão -->
+                <div class="bg-slate-50 border-b border-slate-200/80 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span id="qNumberBadge" class="bg-indigo-600 text-white text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-lg">
+                            DESAFIO #01
+                        </span>
+                        <span id="qCategoryBadge" class="bg-indigo-50 text-indigo-700 border border-indigo-200/70 text-xs font-semibold px-3 py-1 rounded-lg inline-flex items-center gap-1.5">
+                            <i data-lucide="image" class="w-3.5 h-3.5"></i> Geração de Imagem
+                        </span>
+                        <span id="qDifficultyBadge" class="bg-slate-200/70 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
+                            Nível: Iniciante
+                        </span>
+                    </div>
+
+                    <button type="button" onclick="toggleHint()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition cursor-pointer">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                        <span id="hintBtnText">Ver Critérios de Avaliação</span>
+                    </button>
+                </div>
+
+                <!-- Corpo do Desafio -->
+                <div class="p-6 sm:p-8">
+                    <h2 id="qTitle" class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-3">
+                        Título do Desafio
+                    </h2>
+                    <p id="qDescription" class="text-slate-600 text-sm sm:text-base leading-relaxed mb-5">
+                        Descrição detalhada da tarefa.
+                    </p>
+
+                    <!-- Caixa de Contexto / Texto Base (quando aplicável) -->
+                    <div id="qContextBox" class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-4 sm:p-5 mb-5">
+                        <div class="flex items-center gap-2 text-amber-800 font-bold text-xs uppercase tracking-wider mb-1.5">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span>Texto / Material de Apoio para o seu Prompt:</span>
+                        </div>
+                        <p id="qContextText" class="text-slate-800 text-sm leading-relaxed font-medium"></p>
+                    </div>
+
+                    <!-- Caixa de Critérios / Dicas (Oculta por padrão) -->
+                    <div id="hintBox" class="hidden bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4 sm:p-5 mb-6">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-2 flex items-center gap-1.5">
+                            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+                            O que a avaliação vai analisar no seu prompt:
+                        </h4>
+                        <ul id="qCriteriaList" class="list-disc list-inside text-xs sm:text-sm text-indigo-950 space-y-1.5">
+                            <!-- Dicas inseridas via JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Área de Resposta do Aluno -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label for="promptInput" class="block text-sm font-bold text-slate-800">
+                                Escreva seu Prompt abaixo:
+                            </label>
+                            <span id="wordCounter" class="text-xs font-medium text-slate-400">
+                                0 palavras | 0 caracteres
+                            </span>
+                        </div>
+
+                        <textarea
+                            id="promptInput"
+                            rows="5"
+                            oninput="updateCounters()"
+                            placeholder="Digite aqui o comando completo que você enviaria para a Inteligência Artificial..."
+                            class="w-full rounded-2xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 p-4 text-slate-900 text-sm sm:text-base leading-relaxed placeholder-slate-400 transition outline-none resize-y"
+                        ></textarea>
+
+                        <!-- Alerta de Validação -->
+                        <div id="validationToast" class="hidden bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                            <span id="validationMessage">Mensagem de validação.</span>
+                        </div>
+
+                        <!-- Barra de Ações do Formulário -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                            <div class="flex items-center gap-2">
+                                <button id="btnPrev" type="button" onclick="prevQuestion()" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-slate-700 font-semibold text-xs sm:text-sm inline-flex items-center gap-1.5 transition cursor-pointer">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                <button id="btnNext" type="button" onclick="nextQuestion()" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-slate-700 font-semibold text-xs sm:text-sm inline-flex items-center gap-1.5 transition cursor-pointer">
+                                    <span>Próxima</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" onclick="clearCurrentPrompt()" class="px-3 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-medium inline-flex items-center gap-1 transition cursor-pointer" title="Limpar texto">
+                                    <i data-lucide="eraser" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Limpar</span>
+                                </button>
+                            </div>
+
+                            <button type="button" onclick="evaluateCurrentPrompt()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm sm:text-base px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/25 inline-flex items-center justify-center gap-2 transition cursor-pointer">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                                <span>Enviar e Avaliar Prompt</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cartão de Resultado e Feedback (Oculto até o envio) -->
+            <div id="feedbackCard" class="hidden bg-white rounded-3xl shadow-md border border-slate-200 overflow-hidden mb-8">
+                <div class="p-6 sm:p-8">
+                    <!-- Cabeçalho da Nota -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div id="scoreCircle" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-inner border-2 bg-emerald-50 border-emerald-400 text-emerald-700">
+                                <span class="text-[10px] font-bold uppercase tracking-wider opacity-75">Nota</span>
+                                <span id="scoreValue" class="text-2xl sm:text-3xl font-extrabold leading-none mt-0.5">0.0</span>
+                                <span class="text-[10px] font-semibold opacity-75">de 10</span>
+                            </div>
+                            <div>
+                                <span id="scoreBadgeLabel" class="inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md mb-1.5 bg-emerald-100 text-emerald-800">
+                                    Avaliação
+                                </span>
+                                <h3 id="feedbackHeadline" class="text-lg sm:text-xl font-extrabold text-slate-900">
+                                    Resultado do seu Prompt
+                                </h3>
+                                <p id="feedbackSummary" class="text-xs sm:text-sm text-slate-600 mt-1">
+                                    Resumo da análise.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button id="btnAfterScoreNext" type="button" onclick="nextOrFinish()" class="w-full sm:w-auto bg-slate-900 hover:bg-indigo-600 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl inline-flex items-center justify-center gap-2 transition cursor-pointer shrink-0">
+                            <span>Próximo Desafio</span>
+                            <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Pontos Fortes e Pontos de Melhoria -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-6 border-b border-slate-100">
+                        <div class="bg-emerald-50/60 border border-emerald-200/70 rounded-2xl p-4">
+                            <h4 class="font-bold text-emerald-900 text-sm mb-2.5 flex items-center gap-1.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                                Pontos Fortes Identificados
+                            </h4>
+                            <ul id="strengthsList" class="text-xs sm:text-sm text-emerald-950 space-y-2">
+                                <!-- Itens via JS -->
+                            </ul>
+                        </div>
+
+                        <div class="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-4">
+                            <h4 class="font-bold text-amber-900 text-sm mb-2.5 flex items-center gap-1.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+                                Como Deixar Ainda Melhor
+                            </h4>
+                            <ul id="improvementsList" class="text-xs sm:text-sm text-amber-950 space-y-2">
+                                <!-- Itens via JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Exemplo de Prompt Nota 10 -->
+                    <div class="pt-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+                                Exemplo de Prompt Nota 10 (Gabarito Comentado):
+                            </h4>
+                            <button onclick="copyExamplePrompt()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span id="copyBtnLabel">Copiar Exemplo</span>
+                            </button>
+                        </div>
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm font-mono leading-relaxed relative">
+                            <p id="examplePromptText"></p>
+                        </div>
+                        <p id="exampleExplanation" class="text-xs text-slate-500 mt-2 italic"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- =========================================================================
+         PAINEL ADMINISTRATIVO DO PROFESSOR (DASHBOARD ADM)
+         ========================================================================= -->
+    <section id="adminDashboardScreen" class="hidden min-h-screen bg-slate-100 flex-col">
+        <!-- Cabeçalho ADM -->
+        <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-500/20 border border-amber-400/40 p-2.5 rounded-xl">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-amber-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-extrabold text-lg sm:text-xl tracking-tight">Painel do Professor (ADM)</h1>
+                            <span class="bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md">Acesso Restrito</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Acompanhamento de notas, ranking e inspeção dos prompts da turma</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+                    <button onclick="seedDemoStudents()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
+                        <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+                        <span>Simular 3 Alunos</span>
+                    </button>
+                    <button onclick="exportAdminCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exportar CSV (Excel)</span>
+                    </button>
+                    <button onclick="exitAdminMode()" class="bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Sair do ADM</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal do Painel ADM -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <!-- Cards de Métricas da Turma -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Alunos Avaliados</span>
+                        <span id="admTotalStudents" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Média Geral Turma</span>
+                        <span id="admClassAvg" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0.0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="trophy" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Maior Média</span>
+                        <span id="admHighestScore" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0.0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Taxa de Conclusão</span>
+                        <span id="admCompletionRate" class="text-2xl sm:text-3xl font-extrabold text-purple-600">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Filtro e Ações da Tabela -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Ranking e Pontuação dos Alunos</h2>
+                        <p class="text-xs text-slate-500">Clique em "Ver Prompts" para inspecionar as respostas individuais de cada estudante.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-64">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input 
+                                type="text" 
+                                id="admSearchInput" 
+                                oninput="renderAdminDashboard()"
+                                placeholder="Buscar aluno ou turma..." 
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                        </div>
+                        <button onclick="openClearAllRecordsModal()" class="text-rose-600 hover:bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shrink-0 cursor-pointer" title="Apagar todos os registros">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">Limpar Tudo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Alunos -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                                <th class="py-3.5 px-5">Pos.</th>
+                                <th class="py-3.5 px-5">Aluno(a)</th>
+                                <th class="py-3.5 px-5">Turma</th>
+                                <th class="py-3.5 px-5 text-center">Progresso</th>
+                                <th class="py-3.5 px-5 text-center">Nota Média</th>
+                                <th class="py-3.5 px-5">Última Atividade</th>
+                                <th class="py-3.5 px-5 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admStudentsTableBody" class="divide-y divide-slate-100">
+                            <!-- Linhas preenchidas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Estado Vazio (quando nenhum aluno respondeu ainda) -->
+                <div id="admEmptyState" class="hidden py-12 px-4 text-center">
+                    <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="inbox" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800 mb-1">Nenhum registro de aluno encontrado</h3>
+                    <p class="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                        Assim que os alunos entrarem com seus nomes e responderem às questões neste navegador, as notas aparecerão aqui automaticamente.
+                    </p>
+                    <button onclick="seedDemoStudents()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl inline-flex items-center gap-2 transition cursor-pointer">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        Adicionar 3 Alunos de Demonstração
+                    </button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- =========================================================================
+         MODAIS AUXILIARES (LOGIN ADM, DETALHES DO ALUNO, BOLETIM, CONFIRMAÇÕES)
+         ========================================================================= -->
+
+    <!-- Modal de Login do Professor (Senha: ADM123) -->
+    <div id="adminLoginModal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-amber-100 text-amber-700 p-2.5 rounded-xl">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Acesso do Professor</h3>
+                        <p class="text-xs text-slate-500">Área Administrativa (ADM)</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminLoginModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
+                <div>
+                    <label for="adminPasswordInput" class="block text-sm font-bold text-slate-700 mb-1.5">
+                        Digite a senha de administrador:
+                    </label>
+                    <input 
+                        type="password" 
+                        id="adminPasswordInput" 
+                        required
+                        placeholder="••••••••"
+                        class="w-full rounded-xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 px-4 py-3 text-slate-900 font-mono text-base outline-none transition"
+                    >
+                </div>
+
+                <!-- Feedback de senha incorreta -->
+                <div id="adminPasswordError" class="hidden bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 shrink-0"></i>
+                    <span>Senha incorreta! Verifique a senha do professor e tente novamente.</span>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button" onclick="closeAdminLoginModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-slate-900 hover:bg-indigo-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 transition cursor-pointer">
+                        <i data-lucide="unlock" class="w-4 h-4"></i>
+                        <span>Entrar no Painel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Inspeção Detalhada de um Aluno (Visão do Professor) -->
+    <div id="studentDetailModal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 overflow-y-auto p-4 sm:p-6">
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-4">
+            <div class="bg-slate-900 text-white p-6 flex items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Auditoria de Desempenho Individual</span>
+                    <h3 id="detailStudentName" class="text-xl sm:text-2xl font-extrabold mt-0.5">Nome do Aluno</h3>
+                    <p id="detailStudentMeta" class="text-xs text-slate-300 mt-1">Turma • Média Geral</p>
+                </div>
+                <button onclick="closeStudentDetailModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl transition cursor-pointer">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="p-6 max-h-[75vh] overflow-y-auto space-y-4" id="detailQuestionsContainer">
+                <!-- Lista das 15 questões e prompts do aluno gerada via JS -->
+            </div>
+
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end">
+                <button onclick="closeStudentDetailModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition cursor-pointer">
+                    Fechar Detalhes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal / Tela de Boletim Final da Aula (Visão do Aluno) -->
+    <div id="reportModal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 overflow-y-auto p-4 sm:p-6">
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-4">
+            <!-- Cabeçalho do Boletim -->
+            <div class="bg-slate-900 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                        Relatório de Desempenho
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold">Boletim — Academia de Prompts</h2>
+                    <p class="text-slate-300 text-sm mt-1">
+                        Aluno(a): <strong id="reportStudentName" class="text-white">Não informado</strong> • Data: <span id="reportDate"></span>
+                    </p>
+                </div>
+                <button onclick="closeReportModal()" class="no-print bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl transition cursor-pointer">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Resumo Geral de Notas -->
+            <div class="p-6 sm:p-8">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 text-center">
+                        <span class="block text-xs font-bold uppercase text-indigo-600 tracking-wider">Média Geral</span>
+                        <span id="reportAvgScore" class="block text-4xl font-extrabold text-indigo-900 my-1">0.0</span>
+                        <span class="text-xs text-indigo-700">Escala de 0.0 a 10.0</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center">
+                        <span class="block text-xs font-bold uppercase text-emerald-600 tracking-wider">Desafios Concluídos</span>
+                        <span id="reportCompletedCount" class="block text-4xl font-extrabold text-emerald-900 my-1">0 / 15</span>
+                        <span class="text-xs text-emerald-700">Questões enviadas</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 text-center">
+                        <span class="block text-xs font-bold uppercase text-amber-600 tracking-wider">Classificação</span>
+                        <span id="reportRankBadge" class="block text-xl font-extrabold text-amber-900 my-2.5">Iniciante</span>
+                        <span class="text-xs text-amber-700">Nível em Engenharia de Prompt</span>
+                    </div>
+                </div>
+
+                <!-- Tabela Detalhada das 15 Questões -->
+                <h3 class="font-bold text-slate-800 text-lg mb-3">Detalhamento por Questão</h3>
+                <div class="border border-slate-200 rounded-xl overflow-hidden mb-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase">
+                                    <th class="py-3 px-4">#</th>
+                                    <th class="py-3 px-4">Desafio / Categoria</th>
+                                    <th class="py-3 px-4">Prompt Enviado</th>
+                                    <th class="py-3 px-4 text-right">Nota</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="divide-y divide-slate-100">
+                                <!-- Linhas preenchidas via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Botões do Rodapé do Boletim -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 no-print">
+                    <button onclick="resetAllProgress()" class="text-rose-600 hover:bg-rose-50 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition cursor-pointer">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        Reiniciar Aula
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition cursor-pointer">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            Imprimir / Salvar PDF
+                        </button>
+                        <button onclick="closeReportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition cursor-pointer">
+                            Voltar aos Exercícios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Customizado (Substitui window.confirm) -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+            <h3 id="confirmModalTitle" class="text-lg font-bold text-slate-900 mb-2">Reiniciar toda a atividade?</h3>
+            <p id="confirmModalText" class="text-sm text-slate-600 mb-6">Todas as suas respostas e notas das 15 questões serão apagadas para começar do zero.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Cancelar</button>
+                <button id="confirmModalActionBtn" onclick="confirmReset()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white cursor-pointer">Sim, Reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal com Banco das 15 Questões e Motor de Correção -->
+    <script>
+        // Banco de Dados das 15 Questões Diversificadas
+        const QUESTIONS = [
+            {
+                id: 1,
+                category: "Geração de Imagem",
+                icon: "image",
+                difficulty: "Iniciante",
+                title: "Cachorro Voando com Unicórnio e Arco-Íris",
+                description: "Crie um prompt pedindo para uma IA geradora de imagens criar a cena de um cachorro voando lado a lado com um unicórnio no céu, com um arco-íris brilhante atrás deles.",
+                context: null,
+                hints: [
+                    "Use um verbo de comando claro (ex: 'Crie uma imagem', 'Gere uma ilustração').",
+                    "Inclua os 3 elementos principais: cachorro voando, unicórnio e arco-íris atrás.",
+                    "Adicione estilo artístico (ex: estilo Pixar 3D, pintura digital, fotorrealista) e iluminação/cores."
+                ],
+                requiredGroups: [
+                    { label: "Elemento: Cachorro", words: ["cachorro", "cão", "cao", "filhote", "dog"], weight: 2.0 },
+                    { label: "Ação: Voando / No céu", words: ["voando", "voar", "céu", "ceu", "nuvens", "flutuando"], weight: 1.5 },
+                    { label: "Elemento: Unicórnio", words: ["unicórnio", "unicornio"], weight: 2.0 },
+                    { label: "Elemento: Arco-íris", words: ["arco-íris", "arco iris", "arcoiris", "arco-iris"], weight: 1.5 }
+                ],
+                bonusGroups: [
+                    { label: "Estilo Visual / Artístico", words: ["estilo", "3d", "pixar", "realista", "ilustração", "ilustracao", "pintura", "digital", "anime", "aquarela", "cinematográfico"], weight: 1.5 },
+                    { label: "Detalhes de Cena / Luz", words: ["brilhante", "colorido", "luz", "iluminação", "sol", "mágico", "magico", "detalhado", "alta resolução", "4k"], weight: 1.5 }
+                ],
+                examplePrompt: "Crie uma ilustração digital 3D estilo animação da Pixar de um cachorro golden retriever alegre usando uma capa vermelha, voando lado a lado com um unicórnio branco majestoso entre nuvens fofas. Ao fundo, um arco-íris vibrante e brilhante ilumina o céu azul ensolarado, com partículas mágicas e iluminação cinematográfica em alta definição.",
+                exampleExplanation: "Nota 10 porque define o estilo ('3D estilo Pixar'), descreve a raça e expressão do cachorro, posiciona o unicórnio e o arco-íris no cenário e especifica iluminação e qualidade."
+            },
+            {
+                id: 2,
+                category: "Persona / Roleplay",
+                icon: "user-check",
+                difficulty: "Iniciante",
+                title: "Atuando como um Chef Italiano",
+                description: "Peça para a IA assumir o papel (persona) de um chef de cozinha italiano tradicional e explicar o passo a passo de como fazer massa fresca artesanal para alguém que nunca cozinhou.",
+                context: null,
+                hints: [
+                    "Defina a persona logo no início ('Atue como...', 'Você é um chef italiano...').",
+                    "Especifique o tema: receita/passo a passo de massa fresca artesanal.",
+                    "Mencione o público-alvo (iniciantes) e o tom de voz (didático, acolhedor)."
+                ],
+                requiredGroups: [
+                    { label: "Definição de Persona (Chef Italiano)", words: ["chef", "cozinheiro", "italiano", "itália", "italia"], weight: 2.5 },
+                    { label: "Tema: Massa Fresca", words: ["massa", "macarrão", "macarrao", "espaguete", "fettuccine", "artesanal"], weight: 2.5 },
+                    { label: "Formato Passo a Passo", words: ["passo a passo", "receita", "como fazer", "ensine", "explique", "ingredientes"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Público Iniciante", words: ["iniciante", "iniciantes", "nunca cozinhou", "simples", "fácil", "facil", "básico"], weight: 1.5 },
+                    { label: "Tom de Voz / Estilo", words: ["atue como", "aja como", "tom", "acolhedor", "divertido", "apaixonado", "dicas"], weight: 1.5 }
+                ],
+                examplePrompt: "Atue como um renomado chef de cozinha italiano tradicional, apaixonado por gastronomia e muito acolhedor. Ensine o passo a passo completo de como preparar massa fresca artesanal do zero, listando os ingredientes e dando dicas práticas. Use uma linguagem bem simples e didática, ideal para um iniciante que nunca cozinhou antes.",
+                exampleExplanation: "Excelente uso da técnica de Persona ('Atue como...'), definição clara da tarefa, público-alvo ('iniciante') e tom de comunicação."
+            },
+            {
+                id: 3,
+                category: "Resumo e Formato",
+                icon: "list-checks",
+                difficulty: "Iniciante",
+                title: "Resumo em Exatamente 3 Tópicos",
+                description: "Crie um prompt pedindo para a IA resumir o texto abaixo sobre a Revolução Industrial em exatamente 3 tópicos curtos (bullet points), usando linguagem simples para estudantes.",
+                context: "A Revolução Industrial teve início na Inglaterra no século XVIII e transformou profundamente a economia e a sociedade mundial. Antes dela, a produção era artesanal e feita manualmente em pequenas oficinas. Com a invenção da máquina a vapor e dos teares mecânicos, surgiram as grandes fábricas, acelerando a produção em massa, provocando o êxodo rural e criando uma nova classe trabalhadora urbana.",
+                hints: [
+                    "Peça explicitamente para resumir o texto sobre a Revolução Industrial.",
+                    "Estabeleça a restrição de quantidade e formato: 'exatamente 3 tópicos' ou '3 bullet points'.",
+                    "Peça linguagem simples, objetiva ou curta."
+                ],
+                requiredGroups: [
+                    { label: "Ação de Resumir", words: ["resuma", "resumo", "sintetize", "principais pontos"], weight: 2.5 },
+                    { label: "Quantidade Exata (3 tópicos)", words: ["3 tópicos", "três tópicos", "3 bullet", "três bullet", "3 pontos", "três pontos", "3 itens"], weight: 3.0 },
+                    { label: "Tema / Referência ao Texto", words: ["revolução industrial", "revolucao industrial", "texto", "acima", "abaixo"], weight: 1.5 }
+                ],
+                bonusGroups: [
+                    { label: "Linguagem Simples / Curta", words: ["simples", "curto", "curtos", "fácil", "facil", "objetivo", "estudantes", "clara"], weight: 1.5 },
+                    { label: "Restrição de Precisão", words: ["exatamente", "apenas", "somente", "no máximo"], weight: 1.5 }
+                ],
+                examplePrompt: "Resuma o texto fornecido sobre a Revolução Industrial em exatamente 3 tópicos curtos (bullet points). Utilize uma linguagem bem simples, direta e fácil de entender, focada em estudantes do ensino fundamental.",
+                exampleExplanation: "Controla perfeitamente o formato de saída ('exatamente 3 tópicos curtos') e o nível de complexidade do vocabulário."
+            },
+            {
+                id: 4,
+                category: "Programação / Código",
+                icon: "code-2",
+                difficulty: "Intermediário",
+                title: "Calculadora de Notas em Python",
+                description: "Peça para a IA escrever um código em Python que peça 3 notas de um aluno, calcule a média aritmética e exiba se ele foi 'Aprovado' (média >= 7) ou 'Reprovado'. Exija comentários explicando cada parte do código.",
+                context: null,
+                hints: [
+                    "Especifique a linguagem de programação: Python.",
+                    "Descreva a lógica: ler notas, calcular média e verificar condição (>= 7 para aprovado).",
+                    "Peça comentários explicativos linha por linha ou em cada bloco."
+                ],
+                requiredGroups: [
+                    { label: "Linguagem Python", words: ["python"], weight: 2.5 },
+                    { label: "Cálculo de Média", words: ["média", "media", "notas", "calcular"], weight: 2.5 },
+                    { label: "Condição Aprovado/Reprovado", words: ["aprovado", "reprovado", "7", "sete", "condição", "if"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Exigência de Comentários", words: ["comentários", "comentarios", "comentado", "explique", "explicando", "linha por linha"], weight: 2.0 },
+                    { label: "Entrada do Usuário", words: ["input", "digite", "usuário", "usuario", "peça", "pedir", "3 notas", "três notas"], weight: 1.0 }
+                ],
+                examplePrompt: "Escreva um código completo em Python que solicite ao usuário 3 notas de um aluno, calcule a média aritmética entre elas e exiba na tela se o aluno foi 'Aprovado' (caso a média seja maior ou igual a 7.0) ou 'Reprovado'. Adicione comentários detalhados em português explicando o funcionamento de cada linha do código para um estudante iniciante.",
+                exampleExplanation: "Define linguagem, entradas, regra de negócio (média >= 7) e pede documentação didática dentro do código."
+            },
+            {
+                id: 5,
+                category: "Comunicação Profissional",
+                icon: "mail",
+                difficulty: "Iniciante",
+                title: "E-mail Formal Pedindo Adiamento",
+                description: "Crie um prompt para a IA redigir um e-mail profissional endereçado a um gerente ou professor solicitando o adiamento do prazo de entrega de um projeto em 3 dias, mantendo um tom educado, responsável e proativo.",
+                context: null,
+                hints: [
+                    "Especifique o formato: e-mail.",
+                    "Deixe claro o objetivo: pedir adiamento/prorrogação do prazo de um projeto.",
+                    "Defina o tom de voz: formal, educado, profissional e responsável."
+                ],
+                requiredGroups: [
+                    { label: "Formato E-mail", words: ["e-mail", "email", "mensagem"], weight: 2.0 },
+                    { label: "Objetivo: Adiamento de Prazo", words: ["adiamento", "adiar", "prazo", "prorrogação", "prorrogar", "entrega", "estender"], weight: 3.0 },
+                    { label: "Tom Formal / Educado", words: ["formal", "educado", "profissional", "respeitoso", "cordial"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Destinatário / Contexto", words: ["gerente", "chefe", "professor", "cliente", "projeto", "trabalho"], weight: 1.5 },
+                    { label: "Detalhes (Novo prazo / Justificativa)", words: ["dias", "motivo", "justificativa", "qualidade", "assunto", "compromisso"], weight: 1.5 }
+                ],
+                examplePrompt: "Escreva um e-mail formal e educado endereçado ao meu gerente solicitando o adiamento em 3 dias do prazo de entrega do projeto atual. Explique de forma profissional que o tempo extra garantirá a revisão final e a alta qualidade da entrega, reafirmando meu compromisso com o resultado. Inclua também uma sugestão de linha de assunto.",
+                exampleExplanation: "Estabelece destinatário, objetivo claro, justificativa construtiva e pede até o assunto do e-mail."
+            },
+            {
+                id: 6,
+                category: "Geração de Imagem (Produto)",
+                icon: "camera",
+                difficulty: "Intermediário",
+                title: "Foto Publicitária de Tênis Futurista",
+                description: "Elabore um prompt para gerar uma fotografia publicitária ultrarrealista de um tênis esportivo futurista flutuando sobre uma superfície de água, com reflexos e iluminação neon.",
+                context: null,
+                hints: [
+                    "Descreva o objeto principal: tênis esportivo futurista.",
+                    "Descreva a ação/cenário: flutuando sobre a água.",
+                    "Adicione termos de fotografia profissional: iluminação neon, reflexos, lente macro, 8k, fotografia publicitária."
+                ],
+                requiredGroups: [
+                    { label: "Objeto: Tênis Futurista", words: ["tênis", "tenis", "calçado", "sneaker", "futurista"], weight: 2.5 },
+                    { label: "Ação/Cenário: Flutuando na Água", words: ["flutuando", "levitando", "água", "agua", "poça", "superfície"], weight: 2.5 },
+                    { label: "Iluminação Neon", words: ["neon", "luzes", "iluminação", "brilho", "ciano", "magenta"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Estilo Fotografia Publicitária", words: ["foto", "fotografia", "publicitária", "comercial", "realista", "ultrarrealista", "estúdio"], weight: 1.5 },
+                    { label: "Detalhes Técnicos / Reflexo", words: ["reflexo", "gotas", "respingos", "8k", "4k", "detalhado", "foco", "profundidade"], weight: 1.5 }
+                ],
+                examplePrompt: "Fotografia publicitária comercial ultrarrealista de um tênis esportivo futurista com design aerodinâmico flutuando alguns centímetros acima de uma superfície de água escura. Respingos de água congelados no ar, reflexos nítidos na água e iluminação neon em tons de azul ciano e roxo destacando os detalhes do tecido. Capturado com lente profissional, foco nítido e resolução 8k.",
+                exampleExplanation: "Combina descrição do produto, física da cena ('respingos congelados'), iluminação específica e parâmetros fotográficos."
+            },
+            {
+                id: 7,
+                category: "Educação e Analogia",
+                icon: "brain",
+                difficulty: "Iniciante",
+                title: "Explicando Buraco Negro para Crianças",
+                description: "Peça para a IA explicar o conceito científico de 'Buraco Negro' para uma criança de 10 anos, exigindo que a IA utilize uma analogia divertida com objetos do dia a dia.",
+                context: null,
+                hints: [
+                    "Defina o conceito: Buraco Negro.",
+                    "Defina o público: criança de 10 anos (linguagem acessível e lúdica).",
+                    "Peça explicitamente uma analogia ou comparação com algo do cotidiano."
+                ],
+                requiredGroups: [
+                    { label: "Tema: Buraco Negro", words: ["buraco negro", "buracos negros"], weight: 2.5 },
+                    { label: "Público: Criança de 10 anos", words: ["criança", "crianca", "10 anos", "dez anos", "infantil", "jovem"], weight: 2.5 },
+                    { label: "Técnica: Analogia / Comparação", words: ["analogia", "comparação", "comparacao", "exemplo", "como se fosse", "dia a dia", "cotidiano"], weight: 2.5 }
+                ],
+                bonusGroups: [
+                    { label: "Tom Didático e Divertido", words: ["simples", "divertida", "lúdica", "fácil", "curiosa", "explique", "ensine"], weight: 2.5 }
+                ],
+                examplePrompt: "Explique o que é um Buraco Negro para uma criança curiosa de 10 anos. Use uma linguagem leve, divertida e sem termos científicos difíceis. Para facilitar o entendimento, crie uma analogia comparando a gravidade de um buraco negro com algum objeto ou situação simples do nosso dia a dia.",
+                exampleExplanation: "Usa a técnica de 'Explicação por Analogia + Ajuste de Público', essencial para transformar temas complexos em aulas claras."
+            },
+            {
+                id: 8,
+                category: "Estruturação de Dados",
+                icon: "table",
+                difficulty: "Intermediário",
+                title: "Tabela Comparativa de Energias",
+                description: "Solicite à IA uma tabela comparativa entre Energia Solar e Energia Eólica, exigindo que a tabela tenha colunas específicas para: Vantagens, Desvantagens e Custo Inicial.",
+                context: null,
+                hints: [
+                    "Peça o formato de 'tabela' ou 'quadro comparativo'.",
+                    "Cite os dois temas: Energia Solar e Energia Eólica.",
+                    "Especifique as colunas obrigatórias: Vantagens, Desvantagens e Custo Inicial."
+                ],
+                requiredGroups: [
+                    { label: "Formato: Tabela", words: ["tabela", "quadro", "colunas", "comparativa", "comparação"], weight: 2.5 },
+                    { label: "Temas: Solar e Eólica", words: ["solar", "eólica", "eolica"], weight: 2.5 },
+                    { label: "Colunas: Vantagens e Desvantagens", words: ["vantagens", "desvantagens", "prós", "contras"], weight: 2.0 },
+                    { label: "Coluna: Custo Inicial", words: ["custo", "investimento", "preço", "valor"], weight: 1.5 }
+                ],
+                bonusGroups: [
+                    { label: "Organização / Clareza", words: ["objetiva", "resumida", "clara", "linhas", "organize"], weight: 1.5 }
+                ],
+                examplePrompt: "Crie uma tabela comparativa clara e objetiva entre Energia Solar e Energia Eólica. Organize a tabela exatamente com as seguintes colunas: Tipo de Energia, Principais Vantagens, Desvantagens e Custo Inicial de Instalação. Use tópicos curtos dentro das células para facilitar a leitura.",
+                exampleExplanation: "Define a estrutura exata das colunas, garantindo que a IA não invente formatos desorganizados."
+            },
+            {
+                id: 9,
+                category: "Restrições Negativas",
+                icon: "ban",
+                difficulty: "Avançado",
+                title: "História de Suspense com Palavras Proibidas",
+                description: "Peça para a IA escrever uma história curta de suspense sobre alguém explorando uma casa abandonada à noite, mas imponha a restrição negativa de NÃO usar as palavras: 'medo', 'escuro' e 'fantasma'.",
+                context: null,
+                hints: [
+                    "Defina o gênero e tema: história curta de suspense em uma casa abandonada.",
+                    "Aplique restrições negativas claras ('NÃO use', 'proibido usar', 'sem mencionar').",
+                    "Liste as 3 palavras proibidas: medo, escuro e fantasma."
+                ],
+                requiredGroups: [
+                    { label: "Gênero e Tema: Suspense / Casa", words: ["história", "historia", "conto", "suspense", "casa abandonada", "mansão"], weight: 2.5 },
+                    { label: "Comando de Restrição Negativa", words: ["não use", "nao use", "sem usar", "proibido", "evite", "não utilize", "nunca use"], weight: 2.5 },
+                    { label: "Palavras Proibidas (Medo, Escuro, Fantasma)", words: ["medo", "escuro", "fantasma"], weight: 3.0 }
+                ],
+                bonusGroups: [
+                    { label: "Tamanho Curto / Atmosfera", words: ["curta", "parágrafos", "tensão", "misterioso", "criativo", "sinônimos"], weight: 2.0 }
+                ],
+                examplePrompt: "Escreva uma história curta de suspense (máximo de 3 parágrafos) sobre um investigador entrando sozinho em uma casa abandonada durante a madrugada. Regra obrigatória: NÃO utilize em hipótese alguma as palavras 'medo', 'escuro' ou 'fantasma' (nem suas variações). Crie a atmosfera de tensão descrevendo sons, sombras e sensações físicas.",
+                exampleExplanation: "Restrições negativas testam a capacidade de controle do modelo e forçam a IA a ter maior criatividade vocabular."
+            },
+            {
+                id: 10,
+                category: "Brainstorming / Marketing",
+                icon: "lightbulb",
+                difficulty: "Iniciante",
+                title: "Nomes e Slogans para Cafeteria Temática",
+                description: "Crie um prompt pedindo para a IA gerar 5 ideias criativas de nomes acompanhados de um slogan para uma cafeteria temática onde os clientes podem ler livros e interagir com gatos.",
+                context: null,
+                hints: [
+                    "Peça uma quantidade específica: 5 ideias/opções.",
+                    "Solicite dois elementos por ideia: Nome + Slogan.",
+                    "Descreva bem o nicho do negócio: cafeteria + livros + gatos."
+                ],
+                requiredGroups: [
+                    { label: "Quantidade (5 ideias)", words: ["5", "cinco"], weight: 2.0 },
+                    { label: "Entregáveis: Nomes e Slogans", words: ["nomes", "nome", "slogans", "slogan", "frase"], weight: 2.5 },
+                    { label: "Nicho: Cafeteria + Livros + Gatos", words: ["cafeteria", "café", "livros", "leitura", "livraria", "gatos", "felinos"], weight: 3.0 }
+                ],
+                bonusGroups: [
+                    { label: "Criatividade / Público / Estilo", words: ["criativos", "criativas", "aconchegante", "trocadilhos", "marketing", "branding", "explicação"], weight: 2.5 }
+                ],
+                examplePrompt: "Atue como um especialista em branding e marketing. Gere 5 ideias criativas de nomes para uma cafeteria temática aconchegante que combina livraria e espaço de adoção/interação com gatos. Para cada ideia, apresente o nome da cafeteria e um slogan curto e cativante que transmita paz, café fresco e amor por leitura e felinos.",
+                exampleExplanation: "Combina persona de marketing, quantidade exata de ideias, estrutura de saída (Nome + Slogan) e atmosfera da marca."
+            },
+            {
+                id: 11,
+                category: "Tradução e Cultura",
+                icon: "languages",
+                difficulty: "Intermediário",
+                title: "Adaptação Cultural de Expressão Idiomática",
+                description: "Peça para a IA traduzir a expressão em inglês 'Break a leg!' para o português do Brasil, pedindo para NÃO traduzir ao pé da letra, mas sim adaptar culturalmente e explicar o significado.",
+                context: "Expressão original em inglês: 'Break a leg!' (muito usada antes de apresentações de teatro).",
+                hints: [
+                    "Inclua a expressão 'Break a leg!' no prompt.",
+                    "Peça adaptação cultural / equivalente em português (evitando tradução literal).",
+                    "Solicite uma breve explicação do contexto e significado."
+                ],
+                requiredGroups: [
+                    { label: "Expressão Original", words: ["break a leg"], weight: 2.5 },
+                    { label: "Adaptação Cultural (Não Literal)", words: ["adapte", "adaptação", "cultural", "equivalente", "português", "brasil", "não traduza literalmente", "ao pé da letra"], weight: 3.0 },
+                    { label: "Pedido de Explicação", words: ["explique", "significado", "origem", "contexto", "quando usar"], weight: 2.5 }
+                ],
+                bonusGroups: [
+                    { label: "Exemplos de Uso", words: ["exemplo", "frases", "teatro", "apresentação", "boa sorte"], weight: 2.0 }
+                ],
+                examplePrompt: "Traduza a expressão idiomática em inglês 'Break a leg!' para o português do Brasil. Não faça uma tradução literal (ao pé da letra); em vez disso, encontre a melhor adaptação cultural equivalente usada pelos brasileiros. Em seguida, explique brevemente o significado da expressão, em qual contexto ela é usada e dê 2 exemplos de frases.",
+                exampleExplanation: "Ensina a IA a fazer localização (adaptação cultural) em vez de tradução mecânica palavra por palavra."
+            },
+            {
+                id: 12,
+                category: "Extração de Dados / JSON",
+                icon: "braces",
+                difficulty: "Avançado",
+                title: "Extrair Dados de Recibo em JSON",
+                description: "Crie um prompt pedindo para a IA extrair o Nome do Cliente, a Data e o Valor Total do texto de recibo abaixo e devolver a resposta EXCLUSIVAMENTE no formato JSON válido.",
+                context: "Recibo #4092 - Recebemos de Mariana Costa Oliveira a quantia referente à assinatura anual do curso de Robótica, no valor total de R$ 489,90, pago via PIX no dia 14/11/2026.",
+                hints: [
+                    "Especifique os 3 campos a extrair: nome, data e valor.",
+                    "Exija o formato estruturado JSON.",
+                    "Use restrição de saída: 'devolva apenas/exclusivamente o JSON, sem texto adicional'."
+                ],
+                requiredGroups: [
+                    { label: "Formato JSON", words: ["json"], weight: 3.0 },
+                    { label: "Campos (Nome, Data, Valor)", words: ["nome", "data", "valor"], weight: 3.0 },
+                    { label: "Restrição: Apenas o Código", words: ["apenas", "exclusivamente", "somente", "sem texto", "sem explicações", "direto"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Ação de Extrair / Chaves", words: ["extraia", "extrair", "chaves", "campos", "recibo", "texto"], weight: 2.0 }
+                ],
+                examplePrompt: "Extraia as seguintes informações do texto do recibo fornecido: nome do cliente, data do pagamento e valor total. Retorne o resultado EXCLUSIVAMENTE em formato JSON válido, utilizando as chaves 'cliente', 'data' e 'valor'. Não inclua nenhum texto introdutório ou explicação fora do bloco JSON.",
+                exampleExplanation: "Fundamental para integrar IA com sistemas reais: define chaves exatas e proíbe conversa fiada antes/depois do JSON."
+            },
+            {
+                id: 13,
+                category: "Criação de Conteúdo / Vídeo",
+                icon: "video",
+                difficulty: "Intermediário",
+                title: "Roteiro de 60s para TikTok / Reels",
+                description: "Solicite um roteiro dinâmico de até 60 segundos para TikTok/Reels sobre '3 dicas rápidas para parar de procrastinar nos estudos', exigindo divisão clara em: Gancho, Conteúdo e Chamada para Ação (CTA).",
+                context: null,
+                hints: [
+                    "Defina a plataforma (TikTok ou Reels) e a duração (60 segundos).",
+                    "Informe o tema: dicas para vencer a procrastinação nos estudos.",
+                    "Exija a estrutura em 3 partes: Gancho, Conteúdo e CTA (Chamada para Ação)."
+                ],
+                requiredGroups: [
+                    { label: "Formato/Duração (Reels/TikTok 60s)", words: ["tiktok", "reels", "vídeo", "video", "60 segundos", "1 minuto", "curto"], weight: 2.5 },
+                    { label: "Tema: Procrastinação / Estudos", words: ["procrastinar", "procrastinação", "estudos", "estudar", "produtividade"], weight: 2.0 },
+                    { label: "Estrutura: Gancho, Conteúdo e CTA", words: ["gancho", "hook", "conteúdo", "conteudo", "cta", "chamada para ação", "chamada para acao"], weight: 3.5 }
+                ],
+                bonusGroups: [
+                    { label: "Tom / Indicações Visuais", words: ["dinâmico", "jovem", "câmera", "cena", "roteiro", "engajamento"], weight: 2.0 }
+                ],
+                examplePrompt: "Crie um roteiro dinâmico e envolvente de até 60 segundos para um vídeo vertical (TikTok/Reels) com o tema '3 dicas práticas para vencer a procrastinação nos estudos'. Estruture o roteiro obrigatoriamente em 3 partes: 1) Gancho inicial de 3 segundos para prender a atenção, 2) Conteúdo principal com as 3 dicas diretas e 3) Chamada para Ação (CTA) incentivando o público a salvar o vídeo.",
+                exampleExplanation: "Aplica engenharia de estrutura narrativa específica para vídeos curtos, garantindo retenção do início ao fim."
+            },
+            {
+                id: 14,
+                category: "Técnica Few-Shot (Exemplos)",
+                icon: "git-branch",
+                difficulty: "Avançado",
+                title: "Classificador de Sentimentos com Exemplos",
+                description: "Use a técnica 'Few-Shot Prompting' (dar exemplos antes de perguntar): forneça à IA 2 ou 3 exemplos de avaliações de clientes já classificadas como Positivo, Neutro ou Negativo, e peça para ela classificar uma nova frase no final.",
+                context: "Frase final para a IA classificar: 'A entrega foi super rápida, mas o produto veio com um pequeno arranhão na tampa.'",
+                hints: [
+                    "Inclua no seu próprio prompt pelo menos 2 exemplos mostrando 'Frase -> Classificação'.",
+                    "Use os rótulos Positivo, Negativo e/ou Neutro nos exemplos.",
+                    "Coloque a frase final no fim do prompt para a IA seguir o padrão."
+                ],
+                requiredGroups: [
+                    { label: "Presença de Exemplos (Few-Shot)", words: ["exemplo", "exemplos", "positivo", "negativo", "neutro"], weight: 3.5 },
+                    { label: "Padrão de Classificação", words: ["classifique", "classificação", "sentimento", "categoria", "padrão", "padrao", "siga"], weight: 2.5 },
+                    { label: "Frase Alvo Incluída", words: ["entrega", "arranhão", "arranhao", "tampa", "rápida"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Estrutura Organizada (Setas / Dois Pontos)", words: ["->", ":", "avaliação", "avaliacao", "cliente", "resposta"], weight: 2.0 }
+                ],
+                examplePrompt: "Classifique o sentimento das avaliações de clientes abaixo apenas como Positivo, Negativo ou Neutro, seguindo exatamente o padrão dos exemplos:\n\nAvaliação: 'Amei o atendimento, chegou antes do prazo!' -> Sentimento: Positivo\nAvaliação: 'O produto quebrou no primeiro dia, péssimo.' -> Sentimento: Negativo\nAvaliação: 'Funciona como esperado, nada de extraordinário.' -> Sentimento: Neutro\n\nAgora classifique esta avaliação:\nAvaliação: 'A entrega foi super rápida, mas o produto veio com um pequeno arranhão na tampa.' -> Sentimento:",
+                exampleExplanation: "Few-Shot Prompting é uma das técnicas mais poderosas: em vez de explicar regras longas, você mostra exemplos reais do padrão desejado."
+            },
+            {
+                id: 15,
+                category: "Geração de Imagem (Cenário)",
+                icon: "sun",
+                difficulty: "Intermediário",
+                title: "Egito Antigo Cyberpunk ao Pôr do Sol",
+                description: "Crie um prompt rico em detalhes visuais descrevendo uma metrópole futurista misturada com monumentos do Egito Antigo (pirâmides, esfinges, hieróglifos brilhantes) durante o pôr do sol.",
+                context: null,
+                hints: [
+                    "Combine os dois mundos: arquitetura do Egito Antigo (pirâmides/templos) + elementos futuristas (carros voadores, hologramas, arranha-céus).",
+                    "Especifique o horário e iluminação: pôr do sol dourado.",
+                    "Defina estilo artístico, enquadramento (plano aberto/panorâmico) e nível de detalhe."
+                ],
+                requiredGroups: [
+                    { label: "Elemento: Egito Antigo", words: ["egito", "egípcia", "pirâmide", "pirâmides", "piramides", "esfinge", "faraó", "hieróglifos"], weight: 2.5 },
+                    { label: "Elemento: Futurista / Sci-Fi", words: ["futurista", "cyberpunk", "sci-fi", "voadores", "hologramas", "tecnologia", "neon", "robôs"], weight: 2.5 },
+                    { label: "Iluminação: Pôr do Sol", words: ["pôr do sol", "por do sol", "entardecer", "crepúsculo", "dourado", "sol poente"], weight: 2.0 }
+                ],
+                bonusGroups: [
+                    { label: "Enquadramento e Estilo", words: ["cidade", "metrópole", "panorâmica", "épico", "detalhado", "arte conceitual", "cinematográfico", "8k"], weight: 3.0 }
+                ],
+                examplePrompt: "Arte conceitual cinematográfica em plano aberto de uma grandiosa metrópole futurista integrada à arquitetura do Egito Antigo. Pirâmides monumentais revestidas com circuitos dourados e hieróglifos holográficos brilhantes, enquanto veículos voadores cruzam o céu entre obeliscos tecnológicos e palmeiras. Iluminação dramática de pôr do sol dourado e alaranjado refletindo na areia e no vidro, nível de detalhe épico, 8k.",
+                exampleExplanation: "Fecha a jornada com maestria: une fusão de conceitos ('Retrofuturismo Egípcio'), composição panorâmica e paleta de luz dourada."
+            }
+        ];
+
+        // =========================================================================
+        // GERENCIAMENTO DE ESTADO MULTI-ALUNO & AUTENTICAÇÃO ADM
+        // =========================================================================
+        const STORAGE_KEY_DB = "academia_prompts_students_db_v2";
+        const ADMIN_PASSWORD = "ADM123";
+
+        // Banco de todos os alunos no localStorage:
+        // { [studentKey]: { name, className, currentIndex, answers: { [qId]: { prompt, score, evaluation } }, updatedAt } }
+        let studentsDB = {};
+        let activeStudentKey = null;
+
+        // Estado ativo do aluno logado
+        let state = {
+            studentName: "",
+            studentClass: "",
+            currentIndex: 0,
+            answers: {}
+        };
+
+        // Inicialização
+        window.onload = function () {
+            loadStudentsDatabase();
+            renderRecentStudentsOnWelcome();
+            lucide.createIcons();
+        };
+
+        function normalizeStudentKey(name) {
+            return name.trim().toLowerCase().replace(/\s+/g, "_");
+        }
+
+        function loadStudentsDatabase() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_DB);
+                if (raw) {
+                    studentsDB = JSON.parse(raw);
+                }
+            } catch (e) {
+                console.warn("Erro ao carregar banco de alunos:", e);
+                studentsDB = {};
+            }
+        }
+
+        function saveStudentsDatabase() {
+            try {
+                if (activeStudentKey && state.studentName) {
+                    studentsDB[activeStudentKey] = {
+                        name: state.studentName,
+                        className: state.studentClass || "Geral",
+                        currentIndex: state.currentIndex,
+                        answers: state.answers,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+                localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+            } catch (e) {
+                console.warn("Erro ao salvar no localStorage:", e);
+            }
+        }
+
+        // Renderiza atalhos de alunos já cadastrados na tela inicial
+        function renderRecentStudentsOnWelcome() {
+            const keys = Object.keys(studentsDB);
+            const box = document.getElementById("recentStudentsBox");
+            const list = document.getElementById("recentStudentsList");
+
+            if (keys.length === 0) {
+                box.classList.add("hidden");
+                return;
+            }
+
+            box.classList.remove("hidden");
+            list.innerHTML = keys.map(key => {
+                const st = studentsDB[key];
+                const answeredCount = Object.keys(st.answers || {}).length;
+                return `
+                    <button type="button" onclick="resumeStudentSession('${key}')" class="bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i>
+                        <span>${st.name}</span>
+                        <span class="text-[10px] bg-white px-1.5 py-0.5 rounded-md border border-slate-200 text-slate-500">${answeredCount}/15</span>
+                    </button>
+                `;
+            }).join("");
+            lucide.createIcons();
+        }
+
+        // Inicia atividade a partir do formulário da Tela Inicial
+        function handleStudentStart(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById("loginStudentName");
+            const classInput = document.getElementById("loginStudentClass");
+            const errorMsg = document.getElementById("loginErrorMsg");
+
+            const name = nameInput.value.trim();
+            const className = classInput.value.trim();
+
+            if (!name) {
+                errorMsg.classList.remove("hidden");
+                nameInput.focus();
+                return;
+            }
+
+            errorMsg.classList.add("hidden");
+            const key = normalizeStudentKey(name);
+
+            if (studentsDB[key]) {
+                // Recupera progresso existente deste aluno
+                resumeStudentSession(key, className || studentsDB[key].className);
+            } else {
+                // Cria novo registro para o aluno
+                activeStudentKey = key;
+                state = {
+                    studentName: name,
+                    studentClass: className || "Geral",
+                    currentIndex: 0,
+                    answers: {}
+                };
+                saveStudentsDatabase();
+                enterStudentWorkspace();
+            }
+        }
+
+        function resumeStudentSession(key, overrideClass) {
+            const record = studentsDB[key];
+            if (!record) return;
+
+            activeStudentKey = key;
+            state = {
+                studentName: record.name,
+                studentClass: overrideClass || record.className || "Geral",
+                currentIndex: record.currentIndex || 0,
+                answers: record.answers || {}
+            };
+            saveStudentsDatabase();
+            enterStudentWorkspace();
+        }
+
+        function enterStudentWorkspace() {
+            document.getElementById("welcomeScreen").classList.add("hidden");
+            document.getElementById("adminDashboardScreen").classList.add("hidden");
+
+            const appWrapper = document.getElementById("studentAppWrapper");
+            appWrapper.classList.remove("hidden");
+            appWrapper.classList.add("flex");
+
+            // Atualiza dados do aluno no cabeçalho
+            document.getElementById("headerStudentNameDisplay").textContent = state.studentName;
+            document.getElementById("headerStudentClassDisplay").textContent = `Turma: ${state.studentClass}`;
+
+            const initials = state.studentName
+                .split(" ")
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(n => n[0].toUpperCase())
+                .join("");
+            document.getElementById("headerStudentAvatar").textContent = initials || "AL";
+
+            renderQuestionNav();
+            loadQuestion(state.currentIndex);
+            updateHeaderStats();
+            lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function returnToWelcomeScreen() {
+            saveStudentsDatabase();
+            document.getElementById("studentAppWrapper").classList.add("hidden");
+            document.getElementById("studentAppWrapper").classList.remove("flex");
+            document.getElementById("adminDashboardScreen").classList.add("hidden");
+
+            document.getElementById("loginStudentName").value = "";
+            document.getElementById("loginStudentClass").value = "";
+            document.getElementById("welcomeScreen").classList.remove("hidden");
+
+            renderRecentStudentsOnWelcome();
+            lucide.createIcons();
+        }
+
+        // =========================================================================
+        // FLUXO DO PROFESSOR / PAINEL ADMINISTRATIVO (SENHA: ADM123)
+        // =========================================================================
+        function openAdminLoginModal() {
+            const modal = document.getElementById("adminLoginModal");
+            const input = document.getElementById("adminPasswordInput");
+            const err = document.getElementById("adminPasswordError");
+
+            input.value = "";
+            err.classList.add("hidden");
+            modal.classList.remove("hidden");
+            setTimeout(() => input.focus(), 100);
+            lucide.createIcons();
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById("adminLoginModal").classList.add("hidden");
+        }
+
+        function verifyAdminPassword(event) {
+            event.preventDefault();
+            const input = document.getElementById("adminPasswordInput");
+            const err = document.getElementById("adminPasswordError");
+
+            if (input.value.trim() === ADMIN_PASSWORD) {
+                err.classList.add("hidden");
+                closeAdminLoginModal();
+                openAdminDashboard();
+            } else {
+                err.classList.remove("hidden");
+                input.select();
+            }
+        }
+
+        function openAdminDashboard() {
+            loadStudentsDatabase();
+            document.getElementById("welcomeScreen").classList.add("hidden");
+            document.getElementById("studentAppWrapper").classList.add("hidden");
+            document.getElementById("studentAppWrapper").classList.remove("flex");
+
+            const admScreen = document.getElementById("adminDashboardScreen");
+            admScreen.classList.remove("hidden");
+            admScreen.classList.add("flex");
+
+            renderAdminDashboard();
+            lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function exitAdminMode() {
+            document.getElementById("adminDashboardScreen").classList.add("hidden");
+            document.getElementById("adminDashboardScreen").classList.remove("flex");
+
+            if (activeStudentKey && state.studentName) {
+                enterStudentWorkspace();
+            } else {
+                returnToWelcomeScreen();
+            }
+        }
+
+        function calculateStudentStats(studentObj) {
+            const answers = studentObj.answers || {};
+            const ids = Object.keys(answers);
+            const count = ids.length;
+            if (count === 0) {
+                return { count: 0, avg: 0, totalPoints: 0 };
+            }
+            const totalPoints = ids.reduce((acc, id) => acc + (answers[id].score || 0), 0);
+            const avg = totalPoints / count;
+            return { count, avg, totalPoints };
+        }
+
+        function renderAdminDashboard() {
+            const searchQuery = (document.getElementById("admSearchInput").value || "").toLowerCase().trim();
+            const keys = Object.keys(studentsDB);
+
+            // Processa lista de alunos com estatísticas
+            let studentList = keys.map(key => {
+                const st = studentsDB[key];
+                const stats = calculateStudentStats(st);
+                return {
+                    key,
+                    name: st.name,
+                    className: st.className || "Geral",
+                    updatedAt: st.updatedAt,
+                    answers: st.answers || {},
+                    count: stats.count,
+                    avg: stats.avg
+                };
+            });
+
+            // Ordena por maior nota média e depois por maior quantidade respondida
+            studentList.sort((a, b) => {
+                if (b.avg !== a.avg) return b.avg - a.avg;
+                return b.count - a.count;
+            });
+
+            // Atualiza KPIs gerais (sem filtro de busca)
+            const totalStudents = studentList.length;
+            document.getElementById("admTotalStudents").textContent = totalStudents;
+
+            if (totalStudents > 0) {
+                const activeStudents = studentList.filter(s => s.count > 0);
+                const classAvg = activeStudents.length > 0
+                    ? activeStudents.reduce((acc, s) => acc + s.avg, 0) / activeStudents.length
+                    : 0;
+                const highest = Math.max(...studentList.map(s => s.avg));
+                const totalAnsweredAll = studentList.reduce((acc, s) => acc + s.count, 0);
+                const completionPct = Math.round((totalAnsweredAll / (totalStudents * QUESTIONS.length)) * 100);
+
+                document.getElementById("admClassAvg").textContent = classAvg.toFixed(1);
+                document.getElementById("admHighestScore").textContent = highest.toFixed(1);
+                document.getElementById("admCompletionRate").textContent = `${completionPct}%`;
+            } else {
+                document.getElementById("admClassAvg").textContent = "0.0";
+                document.getElementById("admHighestScore").textContent = "0.0";
+                document.getElementById("admCompletionRate").textContent = "0%";
+            }
+
+            // Filtra pela busca
+            const filtered = studentList.filter(s =>
+                s.name.toLowerCase().includes(searchQuery) ||
+                s.className.toLowerCase().includes(searchQuery)
+            );
+
+            const tbody = document.getElementById("admStudentsTableBody");
+            const emptyState = document.getElementById("admEmptyState");
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                lucide.createIcons();
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            tbody.innerHTML = filtered.map((st, idx) => {
+                const rank = idx + 1;
+                let rankBadge = `<span class="font-bold text-slate-500">#${rank}</span>`;
+                if (rank === 1 && st.count > 0) rankBadge = `<span class="bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded-md text-xs">🥇 1º</span>`;
+                else if (rank === 2 && st.count > 0) rankBadge = `<span class="bg-slate-200 text-slate-800 font-extrabold px-2 py-0.5 rounded-md text-xs">🥈 2º</span>`;
+                else if (rank === 3 && st.count > 0) rankBadge = `<span class="bg-orange-100 text-orange-800 font-extrabold px-2 py-0.5 rounded-md text-xs">🥉 3º</span>`;
+
+                const scoreColor = st.count === 0
+                    ? "bg-slate-100 text-slate-500"
+                    : st.avg >= 8
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                        : st.avg >= 5
+                            ? "bg-amber-100 text-amber-800 border border-amber-200"
+                            : "bg-rose-100 text-rose-800 border border-rose-200";
+
+                const pct = Math.round((st.count / QUESTIONS.length) * 100);
+                const formattedDate = st.updatedAt
+                    ? new Date(st.updatedAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+                    : "-";
+
+                return `
+                    <tr class="hover:bg-slate-50/90 transition">
+                        <td class="py-4 px-5">${rankBadge}</td>
+                        <td class="py-4 px-5">
+                            <div class="font-bold text-slate-900">${st.name}</div>
+                        </td>
+                        <td class="py-4 px-5">
+                            <span class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-lg">${st.className}</span>
+                        </td>
+                        <td class="py-4 px-5">
+                            <div class="flex flex-col items-center">
+                                <span class="text-xs font-bold text-slate-700 mb-1">${st.count} / ${QUESTIONS.length}</span>
+                                <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div class="bg-indigo-600 h-full rounded-full" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-5 text-center">
+                            <span class="${scoreColor} font-extrabold text-sm px-3 py-1 rounded-xl inline-block">
+                                ${st.count > 0 ? st.avg.toFixed(1) : "—"}
+                            </span>
+                        </td>
+                        <td class="py-4 px-5 text-xs text-slate-500">${formattedDate}</td>
+                        <td class="py-4 px-5 text-right">
+                            <div class="inline-flex items-center gap-2">
+                                <button onclick="inspectStudentDetails('${st.key}')" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-semibold text-xs px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition cursor-pointer">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    <span>Ver Prompts</span>
+                                </button>
+                                <button onclick="deleteSingleStudent('${st.key}')" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg transition cursor-pointer" title="Excluir registro deste aluno">
+                                    <i data-lucide="trash" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+
+            lucide.createIcons();
+        }
+
+        // Abre modal detalhado mostrando todos os prompts enviados por um aluno
+        function inspectStudentDetails(studentKey) {
+            const st = studentsDB[studentKey];
+            if (!st) return;
+
+            const stats = calculateStudentStats(st);
+            document.getElementById("detailStudentName").textContent = st.name;
+            document.getElementById("detailStudentMeta").textContent = `Turma: ${st.className || "Geral"} • Respondidas: ${stats.count}/15 • Nota Média: ${stats.avg.toFixed(1)} / 10.0`;
+
+            const container = document.getElementById("detailQuestionsContainer");
+            container.innerHTML = QUESTIONS.map(q => {
+                const ans = (st.answers || {})[q.id];
+                if (!ans) {
+                    return `
+                        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60 flex items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs font-bold text-slate-400">QUESTÃO #${String(q.id).padStart(2, '0')} • ${q.category}</span>
+                                <h4 class="font-bold text-slate-700 text-sm">${q.title}</h4>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-400 bg-white border border-slate-200 px-2.5 py-1 rounded-lg">Não respondida</span>
+                        </div>
+                    `;
+                }
+
+                const badgeColor = ans.score >= 8
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                    : ans.score >= 5
+                        ? "bg-amber-100 text-amber-800 border-amber-200"
+                        : "bg-rose-100 text-rose-800 border-rose-200";
+
+                return `
+                    <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-xs">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-600">QUESTÃO #${String(q.id).padStart(2, '0')} • ${q.category}</span>
+                                <h4 class="font-bold text-slate-900 text-sm">${q.title}</h4>
+                            </div>
+                            <span class="${badgeColor} border font-extrabold text-xs px-3 py-1 rounded-lg">
+                                Nota: ${ans.score.toFixed(1)} / 10.0
+                            </span>
+                        </div>
+                        <div class="bg-slate-900 text-slate-100 rounded-lg p-3 text-xs font-mono leading-relaxed">
+                            ${ans.prompt}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            document.getElementById("studentDetailModal").classList.remove("hidden");
+            lucide.createIcons();
+        }
+
+        function closeStudentDetailModal() {
+            document.getElementById("studentDetailModal").classList.add("hidden");
+        }
+
+        function deleteSingleStudent(studentKey) {
+            delete studentsDB[studentKey];
+            if (activeStudentKey === studentKey) {
+                activeStudentKey = null;
+                state.answers = {};
+            }
+            saveStudentsDatabase();
+            renderAdminDashboard();
+        }
+
+        // Exporta notas da turma em CSV compatível com Excel
+        function exportAdminCSV() {
+            const keys = Object.keys(studentsDB);
+            if (keys.length === 0) return;
+
+            const headers = ["Aluno", "Turma", "Questoes Respondidas", "Nota Media (0-10)", ...QUESTIONS.map(q => `Q${q.id} (${q.title})`)];
+            const rows = keys.map(key => {
+                const st = studentsDB[key];
+                const stats = calculateStudentStats(st);
+                const qScores = QUESTIONS.map(q => {
+                    const ans = (st.answers || {})[q.id];
+                    return ans ? ans.score.toFixed(1).replace(".", ",") : "";
+                });
+                return [
+                    `"${st.name.replace(/"/g, '""')}"`,
+                    `"${(st.className || "Geral").replace(/"/g, '""')}"`,
+                    `${stats.count}/15`,
+                    stats.avg.toFixed(1).replace(".", ","),
+                    ...qScores
+                ].join(";");
+            });
+
+            const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `notas_academia_prompts_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Gera 3 alunos fictícios para o professor testar o painel antes da aula
+        function seedDemoStudents() {
+            const demos = [
+                {
+                    name: "Lucas Mendes (Demo)",
+                    className: "9º Ano A",
+                    prompts: {
+                        1: "Crie uma ilustração digital 3D estilo Pixar de um cachorro golden retriever alegre voando ao lado de um unicórnio branco no céu azul com um arco-íris brilhante atrás deles em alta definição.",
+                        2: "Atue como um chef de cozinha italiano tradicional e ensine o passo a passo de como fazer massa fresca artesanal com linguagem simples para um iniciante que nunca cozinhou.",
+                        3: "Resuma o texto sobre a Revolução Industrial em exatamente 3 tópicos curtos usando linguagem simples e objetiva para estudantes.",
+                        4: "Escreva um código em Python que peça 3 notas, calcule a média e diga se foi Aprovado (>=7) ou Reprovado, com comentários explicando cada linha."
+                    }
+                },
+                {
+                    name: "Mariana Costa (Demo)",
+                    className: "9º Ano A",
+                    prompts: {
+                        1: "Gere uma imagem de um cachorro voando com um unicórnio e um arco-íris atrás.",
+                        2: "Você é um chef italiano, me explique a receita de massa fresca."
+                    }
+                },
+                {
+                    name: "Gabriel Oliveira (Demo)",
+                    className: "9º Ano B",
+                    prompts: {
+                        1: "Crie uma pintura digital mágica e detalhada de um cachorro voando entre nuvens com um unicórnio colorido e um arco-íris brilhante ao fundo, iluminação cinematográfica 4k.",
+                        2: "Aja como um chef italiano apaixonado e explique passo a passo como preparar massa fresca artesanal para iniciantes.",
+                        3: "Resuma o texto da Revolução Industrial em apenas 3 bullet points curtos com linguagem fácil.",
+                        5: "Escreva um e-mail formal e educado para meu gerente pedindo o adiamento do prazo de entrega do projeto em 3 dias para garantir máxima qualidade.",
+                        7: "Explique o que é um buraco negro para uma criança de 10 anos usando uma analogia divertida com objetos do dia a dia."
+                    }
+                }
+            ];
+
+            demos.forEach(demo => {
+                const key = normalizeStudentKey(demo.name);
+                const answersObj = {};
+                Object.keys(demo.prompts).forEach(qIdStr => {
+                    const qId = Number(qIdStr);
+                    const qObj = QUESTIONS.find(item => item.id === qId);
+                    if (qObj) {
+                        const evalResult = runGradingEngine(demo.prompts[qId], qObj);
+                        answersObj[qId] = {
+                            prompt: demo.prompts[qId],
+                            score: evalResult.score,
+                            evaluation: evalResult
+                        };
+                    }
+                });
+
+                studentsDB[key] = {
+                    name: demo.name,
+                    className: demo.className,
+                    currentIndex: 0,
+                    answers: answersObj,
+                    updatedAt: new Date().toISOString()
+                };
+            });
+
+            saveStudentsDatabase();
+            renderAdminDashboard();
+        }
+
+        let confirmActionMode = "resetStudent"; // 'resetStudent' | 'clearAllAdmin'
+
+        function openClearAllRecordsModal() {
+            confirmActionMode = "clearAllAdmin";
+            document.getElementById("confirmModalTitle").textContent = "Apagar TODOS os registros da turma?";
+            document.getElementById("confirmModalText").textContent = "Isso removerá permanentemente as notas e respostas de todos os alunos salvos neste navegador.";
+            document.getElementById("confirmModalActionBtn").textContent = "Apagar Tudo";
+            document.getElementById("confirmModal").classList.remove("hidden");
+        }
+
+        // Renderiza os 15 botões de navegação no topo
+        function renderQuestionNav() {
+            const container = document.getElementById("questionNavGrid");
+            container.innerHTML = "";
+
+            QUESTIONS.forEach((q, idx) => {
+                const ans = state.answers[q.id];
+                const isCurrent = idx === state.currentIndex;
+
+                let btnClasses = "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center shrink-0 transition cursor-pointer border ";
+
+                if (isCurrent) {
+                    btnClasses += "bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 scale-105";
+                } else if (ans) {
+                    if (ans.score >= 8) {
+                        btnClasses += "bg-emerald-900/60 text-emerald-300 border-emerald-500/50 hover:bg-emerald-800/70";
+                    } else if (ans.score >= 5) {
+                        btnClasses += "bg-amber-900/60 text-amber-300 border-amber-500/50 hover:bg-amber-800/70";
+                    } else {
+                        btnClasses += "bg-rose-900/60 text-rose-300 border-rose-500/50 hover:bg-rose-800/70";
+                    }
+                } else {
+                    btnClasses += "bg-slate-700/60 text-slate-300 border-slate-600 hover:bg-slate-700";
+                }
+
+                const btn = document.createElement("button");
+                btn.className = btnClasses;
+                btn.onclick = () => loadQuestion(idx);
+                btn.title = `Questão ${q.id}: ${q.title}${ans ? ` (Nota: ${ans.score.toFixed(1)})` : ''}`;
+
+                btn.innerHTML = `
+                    <span>${q.id}</span>
+                    ${ans ? `<span class="text-[9px] leading-none opacity-90">${ans.score.toFixed(0)}</span>` : ''}
+                `;
+
+                container.appendChild(btn);
+            });
+        }
+
+        // Carrega os dados da questão selecionada na tela
+        function loadQuestion(index) {
+            state.currentIndex = index;
+            saveStudentsDatabase();
+
+            const q = QUESTIONS[index];
+            const savedAns = state.answers[q.id];
+
+            // Atualiza textos e badges
+            document.getElementById("progressText").textContent = `Questão ${q.id} de ${QUESTIONS.length}`;
+            document.getElementById("qNumberBadge").textContent = `DESAFIO #${String(q.id).padStart(2, '0')}`;
+            document.getElementById("qCategoryBadge").innerHTML = `<i data-lucide="${q.icon}" class="w-3.5 h-3.5"></i> ${q.category}`;
+            document.getElementById("qDifficultyBadge").textContent = `Nível: ${q.difficulty}`;
+            document.getElementById("qTitle").textContent = q.title;
+            document.getElementById("qDescription").textContent = q.description;
+
+            // Contexto extra (se existir)
+            const contextBox = document.getElementById("qContextBox");
+            if (q.context) {
+                contextBox.classList.remove("hidden");
+                document.getElementById("qContextText").textContent = q.context;
+            } else {
+                contextBox.classList.add("hidden");
+            }
+
+            // Dicas / Critérios
+            const criteriaList = document.getElementById("qCriteriaList");
+            criteriaList.innerHTML = q.hints.map(h => `<li>${h}</li>`).join("");
+            document.getElementById("hintBox").classList.add("hidden");
+            document.getElementById("hintBtnText").textContent = "Ver Critérios de Avaliação";
+
+            // Preenche textarea se já respondida antes
+            const input = document.getElementById("promptInput");
+            input.value = savedAns ? savedAns.prompt : "";
+            updateCounters();
+            hideValidationToast();
+
+            // Botões Anterior / Próxima
+            document.getElementById("btnPrev").disabled = index === 0;
+            document.getElementById("btnNext").disabled = index === QUESTIONS.length - 1;
+
+            // Exibe ou oculta o painel de feedback
+            if (savedAns && savedAns.evaluation) {
+                renderFeedback(savedAns.evaluation, q);
+            } else {
+                document.getElementById("feedbackCard").classList.add("hidden");
+            }
+
+            renderQuestionNav();
+            lucide.createIcons();
+        }
+
+        function toggleHint() {
+            const box = document.getElementById("hintBox");
+            const label = document.getElementById("hintBtnText");
+            const isHidden = box.classList.contains("hidden");
+            if (isHidden) {
+                box.classList.remove("hidden");
+                label.textContent = "Ocultar Critérios";
+            } else {
+                box.classList.add("hidden");
+                label.textContent = "Ver Critérios de Avaliação";
+            }
+        }
+
+        function updateCounters() {
+            const text = document.getElementById("promptInput").value;
+            const chars = text.length;
+            const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+            document.getElementById("wordCounter").textContent = `${words} palavra${words !== 1 ? 's' : ''} | ${chars} caractere${chars !== 1 ? 's' : ''}`;
+        }
+
+        function clearCurrentPrompt() {
+            document.getElementById("promptInput").value = "";
+            updateCounters();
+            hideValidationToast();
+            document.getElementById("promptInput").focus();
+        }
+
+        function prevQuestion() {
+            if (state.currentIndex > 0) {
+                loadQuestion(state.currentIndex - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (state.currentIndex < QUESTIONS.length - 1) {
+                loadQuestion(state.currentIndex + 1);
+            }
+        }
+
+        function nextOrFinish() {
+            if (state.currentIndex < QUESTIONS.length - 1) {
+                loadQuestion(state.currentIndex + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showReportModal();
+            }
+        }
+
+        function showValidationToast(msg) {
+            const toast = document.getElementById("validationToast");
+            document.getElementById("validationMessage").textContent = msg;
+            toast.classList.remove("hidden");
+        }
+
+        function hideValidationToast() {
+            document.getElementById("validationToast").classList.add("hidden");
+        }
+
+        // =========================================================================
+        // MOTOR INTELIGENTE DE AVALIAÇÃO DE PROMPTS (NOTA DE 0.0 A 10.0)
+        // =========================================================================
+        function evaluateCurrentPrompt() {
+            const rawPrompt = document.getElementById("promptInput").value.trim();
+
+            if (!rawPrompt) {
+                showValidationToast("Escreva seu prompt no campo acima antes de enviar para avaliação.");
+                return;
+            }
+
+            if (rawPrompt.split(/\s+/).length < 3) {
+                showValidationToast("Seu prompt está curto demais (menos de 3 palavras). Dê uma instrução mais completa para a IA!");
+                return;
+            }
+
+            hideValidationToast();
+
+            const question = QUESTIONS[state.currentIndex];
+            const evaluation = runGradingEngine(rawPrompt, question);
+
+            // Salva no estado e sincroniza no banco do professor
+            state.answers[question.id] = {
+                prompt: rawPrompt,
+                score: evaluation.score,
+                evaluation: evaluation
+            };
+
+            saveStudentsDatabase();
+            renderFeedback(evaluation, question);
+            renderQuestionNav();
+            updateHeaderStats();
+
+            // Rola suavemente até o resultado
+            document.getElementById("feedbackCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function runGradingEngine(promptText, question) {
+            const lower = promptText.toLowerCase();
+            const words = promptText.split(/\s+/);
+            const wordCount = words.length;
+
+            let earnedPoints = 0;
+            let maxPossiblePoints = 0;
+            const strengths = [];
+            const improvements = [];
+
+            // 1. Avaliar grupos obrigatórios (Elementos centrais da tarefa)
+            question.requiredGroups.forEach(group => {
+                maxPossiblePoints += group.weight;
+                const matched = group.words.some(kw => lower.includes(kw.toLowerCase()));
+                if (matched) {
+                    earnedPoints += group.weight;
+                    strengths.push(`Incluiu corretamente: <strong>${group.label}</strong>.`);
+                } else {
+                    improvements.push(`Faltou especificar claramente: <strong>${group.label}</strong>.`);
+                }
+            });
+
+            // 2. Avaliar grupos bônus (Estilo, formato, tom, detalhes)
+            question.bonusGroups.forEach(group => {
+                maxPossiblePoints += group.weight;
+                const matched = group.words.some(kw => lower.includes(kw.toLowerCase()));
+                if (matched) {
+                    earnedPoints += group.weight;
+                    strengths.push(`Bom refinamento de prompt: <strong>${group.label}</strong>.`);
+                } else {
+                    improvements.push(`Dica para elevar a nota: adicione detalhes de <strong>${group.label}</strong>.`);
+                }
+            });
+
+            // 3. Avaliar Estrutura de Comando (Verbo de ação / Instrução direta)
+            maxPossiblePoints += 1.5;
+            const actionVerbs = [
+                "crie", "gere", "escreva", "faça", "faca", "atue", "aja", "explique",
+                "resuma", "traduza", "adapte", "extraia", "elabore", "desenvolva",
+                "monte", "liste", "classifique", "imagine", "desenhe", "ilustre", "quero que"
+            ];
+            const hasActionVerb = actionVerbs.some(v => lower.includes(v));
+            if (hasActionVerb) {
+                earnedPoints += 1.5;
+                strengths.push("Usou um <strong>verbo de comando claro</strong> orientando a ação da IA.");
+            } else {
+                improvements.push("Comece com um verbo de comando direto (ex: <em>'Crie...'</em>, <em>'Atue como...'</em>, <em>'Gere...'</em>).");
+            }
+
+            // 4. Avaliar Profundidade / Tamanho Adequado
+            maxPossiblePoints += 1.5;
+            if (wordCount >= 18) {
+                earnedPoints += 1.5;
+                strengths.push(`Ótimo nível de detalhamento (${wordCount} palavras).`);
+            } else if (wordCount >= 10) {
+                earnedPoints += 0.9;
+                improvements.push("Seu prompt está bom, mas pode ficar ainda mais rico com mais adjetivos e contexto.");
+            } else {
+                earnedPoints += 0.3;
+                improvements.push("Prompt muito curto. Prompts detalhados geram respostas muito melhores na IA.");
+            }
+
+            // Cálculo final normalizado para escala 0.0 a 10.0
+            let rawScore = (earnedPoints / maxPossiblePoints) * 10;
+
+            // Penalidade especial na Questão 9 se o aluno esquecer de citar as palavras proibidas corretamente
+            if (question.id === 9 && !lower.includes("não") && !lower.includes("nao") && !lower.includes("sem") && !lower.includes("proibido")) {
+                rawScore = Math.min(rawScore, 5.5);
+            }
+
+            // Arredondar para 1 casa decimal e garantir limites [0, 10]
+            let finalScore = Math.max(0, Math.min(10, Math.round(rawScore * 10) / 10));
+
+            // Se acertou todos os requisitos e bônus, garantir 10.0
+            if (improvements.length === 0) {
+                finalScore = 10.0;
+                improvements.push("Nenhum ponto pendente! Você dominou todos os critérios deste desafio.");
+            }
+
+            if (strengths.length === 0) {
+                strengths.push("Você enviou uma tentativa inicial, mas faltaram os elementos centrais do pedido.");
+            }
+
+            return {
+                score: finalScore,
+                strengths,
+                improvements
+            };
+        }
+
+        // Renderiza o cartão de resultado na interface
+        function renderFeedback(evaluation, question) {
+            const card = document.getElementById("feedbackCard");
+            card.classList.remove("hidden");
+
+            const score = evaluation.score;
+            const circle = document.getElementById("scoreCircle");
+            const scoreVal = document.getElementById("scoreValue");
+            const badge = document.getElementById("scoreBadgeLabel");
+            const headline = document.getElementById("feedbackHeadline");
+            const summary = document.getElementById("feedbackSummary");
+
+            scoreVal.textContent = score.toFixed(1);
+
+            // Estilização dinâmica por faixa de nota
+            circle.className = "w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-inner border-2 ";
+            badge.className = "inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md mb-1.5 ";
+
+            if (score >= 8.0) {
+                circle.classList.add("bg-emerald-50", "border-emerald-400", "text-emerald-700");
+                badge.classList.add("bg-emerald-100", "text-emerald-800");
+                badge.textContent = "Excelente • Engenharia Avançada";
+                headline.textContent = score === 10 ? "Perfeito! Prompt Nota 10!" : "Mandou muito bem!";
+                summary.textContent = "Seu prompt possui clareza, contexto e os elementos necessários para uma excelente resposta da IA.";
+            } else if (score >= 5.0) {
+                circle.classList.add("bg-amber-50", "border-amber-400", "text-amber-700");
+                badge.classList.add("bg-amber-100", "text-amber-800");
+                badge.textContent = "Bom Caminho • Pode Refinar";
+                headline.textContent = "Bom prompt, mas dá para chegar ao 10!";
+                summary.textContent = "Você incluiu a ideia principal, mas adicionar estilo, formato ou restrições deixará o resultado muito superior.";
+            } else {
+                circle.classList.add("bg-rose-50", "border-rose-400", "text-rose-700");
+                badge.classList.add("bg-rose-100", "text-rose-800");
+                badge.textContent = "Precisa de Ajustes";
+                headline.textContent = "Prompt muito vago ou incompleto";
+                summary.textContent = "Lembre-se: a IA não lê pensamentos. Revise os itens faltantes abaixo e tente enviar novamente!";
+            }
+
+            // Listas de pontos positivos e melhorias
+            document.getElementById("strengthsList").innerHTML = evaluation.strengths
+                .map(s => `<li class="flex items-start gap-2"><span class="text-emerald-600 font-bold mt-0.5">✓</span><span>${s}</span></li>`)
+                .join("");
+
+            document.getElementById("improvementsList").innerHTML = evaluation.improvements
+                .map(i => `<li class="flex items-start gap-2"><span class="text-amber-600 font-bold mt-0.5">•</span><span>${i}</span></li>`)
+                .join("");
+
+            // Exemplo Nota 10
+            document.getElementById("examplePromptText").textContent = question.examplePrompt;
+            document.getElementById("exampleExplanation").textContent = `Por que funciona: ${question.exampleExplanation}`;
+            document.getElementById("copyBtnLabel").textContent = "Copiar Exemplo";
+
+            // Atualiza texto do botão de próxima questão
+            const btnNext = document.getElementById("btnAfterScoreNext");
+            if (state.currentIndex === QUESTIONS.length - 1) {
+                btnNext.innerHTML = `<span>Ver Boletim Final</span><i data-lucide="award" class="w-5 h-5"></i>`;
+            } else {
+                btnNext.innerHTML = `<span>Próximo Desafio</span><i data-lucide="arrow-right-circle" class="w-5 h-5"></i>`;
+            }
+
+            lucide.createIcons();
+        }
+
+        // Copia o prompt exemplo usando método compatível com iframes
+        function copyExamplePrompt() {
+            const text = document.getElementById("examplePromptText").textContent;
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            const label = document.getElementById("copyBtnLabel");
+            label.textContent = "Copiado!";
+            setTimeout(() => {
+                label.textContent = "Copiar Exemplo";
+            }, 2000);
+        }
+
+        // Atualiza média no cabeçalho
+        function updateHeaderStats() {
+            const answeredIds = Object.keys(state.answers);
+            const count = answeredIds.length;
+            document.getElementById("headerAnsweredCount").textContent = `${count}/${QUESTIONS.length}`;
+
+            if (count === 0) {
+                document.getElementById("headerAvgScore").textContent = "0.0";
+                return;
+            }
+
+            const sum = answeredIds.reduce((acc, id) => acc + state.answers[id].score, 0);
+            const avg = sum / count;
+            const avgEl = document.getElementById("headerAvgScore");
+            avgEl.textContent = avg.toFixed(1);
+
+            avgEl.className = "font-bold text-sm " + (avg >= 8 ? "text-emerald-400" : avg >= 5 ? "text-amber-400" : "text-rose-400");
+        }
+
+        // =========================================================================
+        // BOLETIM FINAL E REINICIALIZAÇÃO
+        // =========================================================================
+        function showReportModal() {
+            const modal = document.getElementById("reportModal");
+            modal.classList.remove("hidden");
+
+            const name = state.studentName || "Aluno(a) Convidado(a)";
+            document.getElementById("reportStudentName").textContent = name;
+            document.getElementById("reportDate").textContent = new Date().toLocaleDateString("pt-BR");
+
+            const answeredIds = Object.keys(state.answers);
+            const count = answeredIds.length;
+            const totalSum = answeredIds.reduce((acc, id) => acc + state.answers[id].score, 0);
+            // Média considerando as respondidas (ou geral das 15 se preferir, aqui mostramos média das respondidas e progresso)
+            const avg = count > 0 ? (totalSum / count) : 0;
+
+            document.getElementById("reportAvgScore").textContent = avg.toFixed(1);
+            document.getElementById("reportCompletedCount").textContent = `${count} / ${QUESTIONS.length}`;
+
+            const rankEl = document.getElementById("reportRankBadge");
+            if (count === 0) {
+                rankEl.textContent = "Aguardando Respostas";
+            } else if (avg >= 8.5) {
+                rankEl.textContent = "Mestre em Prompts";
+            } else if (avg >= 7.0) {
+                rankEl.textContent = "Engenheiro(a) Júnior";
+            } else if (avg >= 5.0) {
+                rankEl.textContent = "Aprendiz de IA";
+            } else {
+                rankEl.textContent = "Explorador(a) Inicial";
+            }
+
+            // Preenche tabela detalhada
+            const tbody = document.getElementById("reportTableBody");
+            tbody.innerHTML = QUESTIONS.map(q => {
+                const ans = state.answers[q.id];
+                let scoreBadge = `<span class="text-slate-400 font-medium text-xs">Pendente</span>`;
+                let promptPreview = `<span class="text-slate-400 italic text-xs">Não respondida</span>`;
+
+                if (ans) {
+                    const color = ans.score >= 8 ? "bg-emerald-100 text-emerald-800" : ans.score >= 5 ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800";
+                    scoreBadge = `<span class="${color} font-bold px-2.5 py-1 rounded-lg text-xs">${ans.score.toFixed(1)}</span>`;
+                    promptPreview = `<p class="text-slate-700 text-xs line-clamp-2 max-w-md" title="${ans.prompt.replace(/"/g, '&quot;')}">${ans.prompt}</p>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50/80">
+                        <td class="py-3 px-4 font-bold text-slate-500">#${String(q.id).padStart(2, '0')}</td>
+                        <td class="py-3 px-4">
+                            <div class="font-semibold text-slate-800">${q.title}</div>
+                            <div class="text-[11px] text-slate-500">${q.category}</div>
+                        </td>
+                        <td class="py-3 px-4">${promptPreview}</td>
+                        <td class="py-3 px-4 text-right">${scoreBadge}</td>
+                    </tr>
+                `;
+            }).join("");
+
+            lucide.createIcons();
+        }
+
+        function closeReportModal() {
+            document.getElementById("reportModal").classList.add("hidden");
+        }
+
+        function resetAllProgress() {
+            confirmActionMode = "resetStudent";
+            document.getElementById("confirmModalTitle").textContent = "Reiniciar toda a sua atividade?";
+            document.getElementById("confirmModalText").textContent = "Todas as suas respostas e notas das 15 questões serão apagadas para começar do zero.";
+            document.getElementById("confirmModalActionBtn").textContent = "Sim, Reiniciar";
+            document.getElementById("confirmModal").classList.remove("hidden");
+        }
+
+        function closeConfirmModal() {
+            document.getElementById("confirmModal").classList.add("hidden");
+        }
+
+        function confirmReset() {
+            if (confirmActionMode === "clearAllAdmin") {
+                studentsDB = {};
+                activeStudentKey = null;
+                state.answers = {};
+                saveStudentsDatabase();
+                closeConfirmModal();
+                renderAdminDashboard();
+                return;
+            }
+
+            state.answers = {};
+            state.currentIndex = 0;
+            saveStudentsDatabase();
+            closeConfirmModal();
+            closeReportModal();
+            loadQuestion(0);
+            updateHeaderStats();
+        }
+    </script>
+</body>
+</html>
