@@ -1367,6 +1367,30 @@
 
         function decodeSubmissionPayload(rawCode) {
             const clean = rawCode.trim().replace(/^PROMPTS-/, "");
+            const jsonStr = decodeURIComponent(escape(atob(clean)));
+            const parsed = JSON.parse(jsonStr);
+            if (!parsed || !parsed.n) return null;
+
+            const reconstructedAnswers = {};
+            Object.keys(parsed.a || {}).forEach(qId => {
+                const item = parsed.a[qId];
+                const qObj = QUESTIONS.find(q => q.id === Number(qId));
+                reconstructedAnswers[qId] = {
+                    prompt: item.p,
+                    score: Number(item.s) || 0,
+                    evaluation: qObj ? runGradingEngine(item.p, qObj) : null
+                };
+            });
+
+            return {
+                name: parsed.n,
+                className: parsed.c || "Geral",
+                currentIndex: 0,
+                answers: reconstructedAnswers,
+                updatedAt: parsed.u || new Date().toISOString()
+            };
+        }
+
         function copyShareableLinkForTeacher() {
             saveStudentsDatabase();
             const currentObj = {
