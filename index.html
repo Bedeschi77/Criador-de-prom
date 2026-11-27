@@ -134,7 +134,7 @@
                         <span>Por favor, digite seu nome para iniciar a atividade.</span>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-base py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition cursor-pointer mt-2">
+                    <button type="button" onclick="handleStudentStart(event)" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-base py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition cursor-pointer mt-2">
                         <span>Iniciar Atividade</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </button>
@@ -809,6 +809,20 @@
         </div>
     </div>
 
+    <!-- Variáveis Globais Compartilhadas entre Módulos e Scripts -->
+    <script>
+        const STORAGE_KEY_DB = "academia_prompts_students_db_v2";
+        const ADMIN_PASSWORD = "ADM123";
+        let studentsDB = {};
+        let activeStudentKey = null;
+        let state = {
+            studentName: "",
+            studentClass: "",
+            currentIndex: 0,
+            answers: {}
+        };
+    </script>
+
     <!-- Script Principal com Banco das 15 Questões e Motor de Correção -->
     <script type="module">
         // =========================================================================
@@ -863,13 +877,22 @@
                     snapshot.forEach((docSnap) => {
                         const data = docSnap.data();
                         if (data && data.name) {
-                            const key = normalizeStudentKey(data.name);
+                            const key = typeof normalizeStudentKey === "function"
+                                ? normalizeStudentKey(data.name)
+                                : data.name.toLowerCase().trim();
                             studentsDB[key] = data;
                         }
                     });
-                    localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
-                    renderRecentStudentsOnWelcome();
-                    if (!document.getElementById("adminDashboardScreen").classList.contains("hidden")) {
+                    try {
+                        if (window.localStorage) {
+                            window.localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+                        }
+                    } catch (e) {}
+                    if (typeof renderRecentStudentsOnWelcome === "function") {
+                        renderRecentStudentsOnWelcome();
+                    }
+                    const admEl = document.getElementById("adminDashboardScreen");
+                    if (admEl && !admEl.classList.contains("hidden") && typeof renderAdminDashboard === "function") {
                         renderAdminDashboard();
                     }
                 }, (err) => console.warn("Erro na escuta em tempo real:", err));
@@ -1282,29 +1305,28 @@
         // =========================================================================
         // GERENCIAMENTO DE ESTADO MULTI-ALUNO & AUTENTICAÇÃO ADM
         // =========================================================================
-        const STORAGE_KEY_DB = "academia_prompts_students_db_v2";
-        const ADMIN_PASSWORD = "ADM123";
 
-        // Banco de todos os alunos no localStorage:
-        // { [studentKey]: { name, className, currentIndex, answers: { [qId]: { prompt, score, evaluation } }, updatedAt } }
-        let studentsDB = {};
-        let activeStudentKey = null;
+        function safeRefreshIcons() {
+            try {
+                if (typeof lucide !== "undefined" && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            } catch (e) {}
+        }
 
-        // Estado ativo do aluno logado
-        let state = {
-            studentName: "",
-            studentClass: "",
-            currentIndex: 0,
-            answers: {}
-        };
-
-        // Inicialização
-        window.onload = function () {
+        // Inicialização garantida
+        function bootstrapApp() {
             loadStudentsDatabase();
             checkUrlSharedSubmission();
             renderRecentStudentsOnWelcome();
-            lucide.createIcons();
-        };
+            safeRefreshIcons();
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootstrapApp);
+        } else {
+            bootstrapApp();
+        }
 
         function normalizeStudentKey(name) {
             return (name || "")
@@ -1317,11 +1339,11 @@
 
         function loadStudentsDatabase() {
             try {
-                const raw = localStorage.getItem(STORAGE_KEY_DB);
+                const raw = window.localStorage ? window.localStorage.getItem(STORAGE_KEY_DB) : null;
                 studentsDB = raw ? JSON.parse(raw) : {};
             } catch (e) {
-                console.warn("Erro ao carregar localStorage:", e);
-                studentsDB = {};
+                console.warn("Storage bloqueado no dispositivo, usando memória ativa:", e);
+                if (!studentsDB || typeof studentsDB !== "object") studentsDB = {};
             }
         }
 
@@ -1503,9 +1525,11 @@
                         window.syncStudentToCloud(activeStudentKey, record);
                     }
                 }
-                localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+                if (window.localStorage) {
+                    window.localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+                }
             } catch (e) {
-                console.warn("Erro ao salvar no localStorage:", e);
+                console.warn("Aviso ao salvar localmente (continuando em memória):", e);
             }
         }
 
@@ -1532,44 +1556,51 @@
                     </button>
                 `;
             }).join("");
-            lucide.createIcons();
+            safeRefreshIcons();
         }
 
         // Inicia atividade a partir do formulário da Tela Inicial
-        function handleStudentStart(event) {
-            event.preventDefault();
-            const nameInput = document.getElementById("loginStudentName");
-            const classInput = document.getElementById("loginStudentClass");
-            const errorMsg = document.getElementById("loginErrorMsg");
+        window.handleStudentStart = function (event) {
+            if (event && event.preventDefault) event.preventDefault();
+            try {
+                const nameInput = document.getElementById("loginStudentName");
+                const classInput = document.getElementById("loginStudentClass");
+                const errorMsg = document.getElementById("loginErrorMsg");
 
-            const name = nameInput.value.trim();
-            const className = classInput.value.trim();
+                const name = (nameInput.value || "").trim();
+                const className = (classInput.value || "").trim();
 
-            if (!name) {
-                errorMsg.classList.remove("hidden");
-                nameInput.focus();
-                return;
-            }
+                if (!name) {
+                    errorMsg.classList.remove("hidden");
+                    nameInput.focus();
+                    return;
+                }
 
-            errorMsg.classList.add("hidden");
-            const key = normalizeStudentKey(name);
+                errorMsg.classList.add("hidden");
+                const key = normalizeStudentKey(name) || ("aluno_" + Date.now());
 
-            if (studentsDB[key]) {
-                // Recupera progresso existente deste aluno
-                resumeStudentSession(key, className || studentsDB[key].className);
-            } else {
-                // Cria novo registro para o aluno
-                activeStudentKey = key;
-                state = {
-                    studentName: name,
-                    studentClass: className || "Geral",
-                    currentIndex: 0,
-                    answers: {}
-                };
-                saveStudentsDatabase();
+                if (studentsDB[key]) {
+                    resumeStudentSession(key, className || studentsDB[key].className);
+                } else {
+                    activeStudentKey = key;
+                    state = {
+                        studentName: name,
+                        studentClass: className || "Geral",
+                        currentIndex: 0,
+                        answers: {}
+                    };
+                    saveStudentsDatabase();
+                    enterStudentWorkspace();
+                }
+            } catch (err) {
+                console.error("Erro ao iniciar atividade:", err);
+                // Fallback direto para nunca impedir o aluno de entrar
+                activeStudentKey = "aluno_" + Date.now();
+                state.studentName = document.getElementById("loginStudentName").value.trim() || "Aluno(a)";
+                state.studentClass = document.getElementById("loginStudentClass").value.trim() || "Geral";
                 enterStudentWorkspace();
             }
-        }
+        };
 
         function resumeStudentSession(key, overrideClass) {
             const record = studentsDB[key];
