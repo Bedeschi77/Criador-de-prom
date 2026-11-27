@@ -1468,94 +1468,6 @@
             document.getElementById("importFeedbackMsg").classList.add("hidden");
             document.getElementById("importStudentModal").classList.remove("hidden");
             setTimeout(() => document.getElementById("importCodeTextarea").focus(), 100);
-            lucide.createIcons();
-        }
-
-        function closeImportStudentModal() {
-            document.getElementById("importStudentModal").classList.add("hidden");
-        }
-
-        function processStudentImportCode() {
-            const raw = document.getElementById("importCodeTextarea").value.trim();
-            const msgBox = document.getElementById("importFeedbackMsg");
-
-            if (!raw) {
-                msgBox.className = "bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl";
-                msgBox.textContent = "Cole o código enviado pelo aluno antes de importar.";
-                msgBox.classList.remove("hidden");
-                return;
-            }
-
-            try {
-                // Aceita tanto o código puro quanto um link completo contendo ?entrega=...
-                let codeToDecode = raw;
-                if (raw.includes("entrega=")) {
-                    const urlObj = new URL(raw);
-                    codeToDecode = urlObj.searchParams.get("entrega") || raw;
-                }
-
-                const studentRecord = decodeSubmissionPayload(codeToDecode);
-                if (!studentRecord) throw new Error("Formato inválido");
-
-                const key = normalizeStudentKey(studentRecord.name);
-                studentsDB[key] = studentRecord;
-                localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
-
-                renderAdminDashboard();
-                closeImportStudentModal();
-            } catch (e) {
-                msgBox.className = "bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl";
-                msgBox.textContent = "Código inválido ou incompleto. Peça para o aluno clicar em 'Copiar Código p/ Professor' no Boletim.";
-                msgBox.classList.remove("hidden");
-            }
-        }
-
-        function saveStudentsDatabase() {
-            try {
-                if (activeStudentKey && state.studentName) {
-                    const record = {
-                        name: state.studentName,
-                        className: state.studentClass || "Geral",
-                        currentIndex: state.currentIndex,
-                        answers: state.answers,
-                        updatedAt: new Date().toISOString()
-                    };
-                    studentsDB[activeStudentKey] = record;
-                    if (window.syncStudentToCloud) {
-                        window.syncStudentToCloud(activeStudentKey, record);
-                    }
-                }
-                if (window.localStorage) {
-                    window.localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
-                }
-            } catch (e) {
-                console.warn("Aviso ao salvar localmente (continuando em memória):", e);
-            }
-        }
-
-        // Renderiza atalhos de alunos já cadastrados na tela inicial
-        function renderRecentStudentsOnWelcome() {
-            const keys = Object.keys(studentsDB);
-            const box = document.getElementById("recentStudentsBox");
-            const list = document.getElementById("recentStudentsList");
-
-            if (keys.length === 0) {
-                box.classList.add("hidden");
-                return;
-            }
-
-            box.classList.remove("hidden");
-            list.innerHTML = keys.map(key => {
-                const st = studentsDB[key];
-                const answeredCount = Object.keys(st.answers || {}).length;
-                return `
-                    <button type="button" onclick="resumeStudentSession('${key}')" class="bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
-                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i>
-                        <span>${st.name}</span>
-                        <span class="text-[10px] bg-white px-1.5 py-0.5 rounded-md border border-slate-200 text-slate-500">${answeredCount}/15</span>
-                    </button>
-                `;
-            }).join("");
             safeRefreshIcons();
         }
 
@@ -1640,8 +1552,37 @@
             renderQuestionNav();
             loadQuestion(state.currentIndex);
             updateHeaderStats();
-            lucide.createIcons();
+            safeRefreshIcons();
             window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function returnToWelcomeScreen() {
+            saveStudentsDatabase();
+            document.getElementById("studentAppWrapper").classList.add("hidden");
+            document.getElementById("studentAppWrapper").classList.remove("flex");
+            document.getElementById("adminDashboardScreen").classList.add("hidden");
+
+            document.getElementById("loginStudentName").value = "";
+            document.getElementById("loginStudentClass").value = "";
+            document.getElementById("welcomeScreen").classList.remove("hidden");
+
+            renderRecentStudentsOnWelcome();
+            safeRefreshIcons();
+        }
+
+        // =========================================================================
+        // FLUXO DO PROFESSOR / PAINEL ADMINISTRATIVO (SENHA: ADM123)
+        // =========================================================================
+        function openAdminLoginModal() {
+            const modal = document.getElementById("adminLoginModal");
+            const input = document.getElementById("adminPasswordInput");
+            const err = document.getElementById("adminPasswordError");
+
+            input.value = "";
+            err.classList.add("hidden");
+            modal.classList.remove("hidden");
+            setTimeout(() => input.focus(), 100);
+            safeRefreshIcons();
         }
 
         function returnToWelcomeScreen() {
@@ -1703,7 +1644,7 @@
             admScreen.classList.add("flex");
 
             renderAdminDashboard();
-            lucide.createIcons();
+            safeRefreshIcons();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
@@ -1789,7 +1730,7 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = "";
                 emptyState.classList.remove("hidden");
-                lucide.createIcons();
+                safeRefreshIcons();
                 return;
             }
 
@@ -1852,7 +1793,7 @@
                 `;
             }).join("");
 
-            lucide.createIcons();
+            safeRefreshIcons();
         }
 
         // Abre modal detalhado mostrando todos os prompts enviados por um aluno
@@ -1904,7 +1845,7 @@
             }).join("");
 
             document.getElementById("studentDetailModal").classList.remove("hidden");
-            lucide.createIcons();
+            safeRefreshIcons();
         }
 
         function closeStudentDetailModal() {
@@ -2118,7 +2059,7 @@
             }
 
             renderQuestionNav();
-            lucide.createIcons();
+            safeRefreshIcons();
         }
 
         function toggleHint() {
@@ -2466,42 +2407,3 @@
 
             lucide.createIcons();
         }
-
-        function closeReportModal() {
-            document.getElementById("reportModal").classList.add("hidden");
-        }
-
-        function resetAllProgress() {
-            confirmActionMode = "resetStudent";
-            document.getElementById("confirmModalTitle").textContent = "Reiniciar toda a sua atividade?";
-            document.getElementById("confirmModalText").textContent = "Todas as suas respostas e notas das 15 questões serão apagadas para começar do zero.";
-            document.getElementById("confirmModalActionBtn").textContent = "Sim, Reiniciar";
-            document.getElementById("confirmModal").classList.remove("hidden");
-        }
-
-        function closeConfirmModal() {
-            document.getElementById("confirmModal").classList.add("hidden");
-        }
-
-        function confirmReset() {
-            if (confirmActionMode === "clearAllAdmin") {
-                studentsDB = {};
-                activeStudentKey = null;
-                state.answers = {};
-                saveStudentsDatabase();
-                closeConfirmModal();
-                renderAdminDashboard();
-                return;
-            }
-
-            state.answers = {};
-            state.currentIndex = 0;
-            saveStudentsDatabase();
-            closeConfirmModal();
-            closeReportModal();
-            loadQuestion(0);
-            updateHeaderStats();
-        }
-    </script>
-</body>
-</html>
