@@ -215,7 +215,7 @@
 
                     <button onclick="showReportModal()" class="hidden sm:flex bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl items-center gap-1.5 shadow-sm transition cursor-pointer">
                         <i data-lucide="award" class="w-4 h-4"></i>
-                        <span>Boletim</span>
+                        <span>Boletim / Enviar</span>
                     </button>
 
                     <button onclick="openAdminLoginModal()" class="hidden sm:flex bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl items-center gap-1.5 transition cursor-pointer" title="Acesso do Professor">
@@ -439,6 +439,10 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+                    <button onclick="openImportStudentModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+                        <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                        <span>Importar Entrega de Aluno</span>
+                    </button>
                     <button onclick="seedDemoStudents()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
                         <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
                         <span>Simular 3 Alunos</span>
@@ -455,16 +459,29 @@
             </div>
         </header>
 
+        <!-- Aviso Informativo de Sincronização no ADM -->
+        <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 pt-5">
+            <div id="syncStatusBanner" class="bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-2xl px-4 py-3 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="cloud" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                    <span id="syncStatusText"><strong>Modo Multi-Dispositivo Ativo:</strong> Alunos na mesma rede/nuvem aparecem automaticamente. Para alunos em casa/celular no GitHub Pages, peça para clicarem em <strong>"Boletim > Copiar Código de Entrega"</strong> e importe aqui!</span>
+                </div>
+                <button onclick="openImportStudentModal()" class="text-indigo-700 font-bold underline hover:text-indigo-900 shrink-0 cursor-pointer">
+                    + Colar Código de Aluno
+                </button>
+            </div>
+        </div>
+
         <!-- Conteúdo Principal do Painel ADM -->
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
-            <!-- Cards de Métricas da Turma -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+            <!-- Cartões de Indicadores (KPIs) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                         <i data-lucide="users" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Alunos Avaliados</span>
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Total de Alunos</span>
                         <span id="admTotalStudents" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
                     </div>
                 </div>
@@ -712,15 +729,69 @@
                         Reiniciar Aula
                     </button>
 
-                    <div class="flex items-center gap-3">
-                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition cursor-pointer">
-                            <i data-lucide="printer" class="w-4 h-4"></i>
-                            Imprimir / Salvar PDF
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button onclick="copyShareableLinkForTeacher()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-sm transition cursor-pointer">
+                            <i data-lucide="link" class="w-4 h-4"></i>
+                            <span id="copyLinkBtnText">Copiar Link de Entrega</span>
                         </button>
-                        <button onclick="closeReportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition cursor-pointer">
-                            Voltar aos Exercícios
+                        <button onclick="copySubmissionCodeForTeacher()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-sm transition cursor-pointer">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                            <span id="copySubmissionBtnText">Copiar Código</span>
+                        </button>
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition cursor-pointer">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            Imprimir / PDF
+                        </button>
+                        <button onclick="closeReportModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold px-4 py-2.5 rounded-xl text-sm transition cursor-pointer">
+                            Voltar
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Importar Código de Entrega de Aluno (Para o Professor no ADM) -->
+    <div id="importStudentModal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-xl">
+                        <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Importar Entrega do Aluno</h3>
+                        <p class="text-xs text-slate-500">Cole o código enviado pelo aluno para carregar suas notas e prompts</p>
+                    </div>
+                </div>
+                <button onclick="closeImportStudentModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="importCodeTextarea" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                        Código de Entrega (gerado no Boletim do aluno):
+                    </label>
+                    <textarea 
+                        id="importCodeTextarea" 
+                        rows="4" 
+                        placeholder="Cole aqui o texto que começa com PROMPTS-..."
+                        class="w-full rounded-xl border-2 border-slate-200 focus:border-indigo-600 p-3 text-xs font-mono text-slate-800 outline-none"
+                    ></textarea>
+                </div>
+
+                <div id="importFeedbackMsg" class="hidden text-xs font-semibold px-3.5 py-2.5 rounded-xl"></div>
+
+                <div class="flex justify-end gap-2.5">
+                    <button type="button" onclick="closeImportStudentModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="processStudentImportCode()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Carregar no Painel ADM</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -739,6 +810,102 @@
     </div>
 
     <!-- Script Principal com Banco das 15 Questões e Motor de Correção -->
+    <script type="module">
+        // =========================================================================
+        // CONFIGURAÇÃO OPCIONAL DE NUVEM EM TEMPO REAL (FIREBASE FIRESTORE)
+        // Para ver os alunos em tempo real sem precisar de link:
+        // 1. Crie um projeto grátis em console.firebase.google.com
+        // 2. Ative o Firestore Database (Modo de teste) e copie seu firebaseConfig abaixo:
+        // =========================================================================
+        const CLOUD_FIREBASE_CONFIG = null; 
+        // Exemplo:
+        // const CLOUD_FIREBASE_CONFIG = {
+        //   apiKey: "SUA_API_KEY",
+        //   authDomain: "seu-projeto.firebaseapp.com",
+        //   projectId: "seu-projeto",
+        //   storageBucket: "seu-projeto.appspot.com",
+        //   messagingSenderId: "000000000",
+        //   appId: "1:00000:web:00000"
+        // };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let cloudDb = null;
+        let cloudAuth = null;
+        let cloudReady = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'academia-prompts-aula';
+
+        async function initCloudSync() {
+            const activeConfig = typeof __firebase_config !== 'undefined'
+                ? JSON.parse(__firebase_config)
+                : CLOUD_FIREBASE_CONFIG;
+
+            if (!activeConfig) return;
+
+            try {
+                const app = initializeApp(activeConfig);
+                cloudDb = getFirestore(app);
+                cloudAuth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(cloudAuth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(cloudAuth);
+                }
+
+                cloudReady = true;
+
+                // Escuta em tempo real todos os alunos da turma na nuvem
+                const colRef = collection(cloudDb, 'artifacts', appId, 'public', 'data', 'alunos_prompts');
+                onSnapshot(colRef, (snapshot) => {
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        if (data && data.name) {
+                            const key = normalizeStudentKey(data.name);
+                            studentsDB[key] = data;
+                        }
+                    });
+                    localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+                    renderRecentStudentsOnWelcome();
+                    if (!document.getElementById("adminDashboardScreen").classList.contains("hidden")) {
+                        renderAdminDashboard();
+                    }
+                }, (err) => console.warn("Erro na escuta em tempo real:", err));
+
+                const banner = document.getElementById("syncStatusText");
+                if (banner) {
+                    banner.innerHTML = `<strong>🟢 Nuvem em Tempo Real Conectada:</strong> Todas as respostas enviadas pelos celulares e computadores dos alunos aparecem aqui automaticamente!`;
+                }
+            } catch (e) {
+                console.warn("Modo offline/local ativo:", e);
+            }
+        }
+
+        window.syncStudentToCloud = async function (studentKey, record) {
+            if (!cloudReady || !cloudDb || !cloudAuth?.currentUser) return;
+            try {
+                const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'alunos_prompts', studentKey);
+                await setDoc(docRef, record, { merge: true });
+            } catch (e) {
+                console.warn("Erro ao enviar para nuvem:", e);
+            }
+        };
+
+        window.deleteStudentFromCloud = async function (studentKey) {
+            if (!cloudReady || !cloudDb || !cloudAuth?.currentUser) return;
+            try {
+                const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'alunos_prompts', studentKey);
+                await deleteDoc(docRef);
+            } catch (e) {
+                console.warn("Erro ao remover da nuvem:", e);
+            }
+        };
+
+        initCloudSync();
+    </script>
+
     <script>
         // Banco de Dados das 15 Questões Diversificadas
         const QUESTIONS = [
@@ -1134,36 +1301,183 @@
         // Inicialização
         window.onload = function () {
             loadStudentsDatabase();
+            checkUrlSharedSubmission();
             renderRecentStudentsOnWelcome();
             lucide.createIcons();
         };
 
         function normalizeStudentKey(name) {
-            return name.trim().toLowerCase().replace(/\s+/g, "_");
+            return (name || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/\s+/g, "_")
+                .trim();
         }
 
         function loadStudentsDatabase() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_DB);
-                if (raw) {
-                    studentsDB = JSON.parse(raw);
+                studentsDB = raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                console.warn("Erro ao carregar localStorage:", e);
+                studentsDB = {};
+            }
+        }
+
+        // Verifica se a URL possui entrega compartilhada (?entrega=...)
+        function checkUrlSharedSubmission() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const payload = params.get("entrega");
+                if (payload) {
+                    const imported = decodeSubmissionPayload(payload);
+                    if (imported && imported.name) {
+                        const key = normalizeStudentKey(imported.name);
+                        studentsDB[key] = imported;
+                        localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+                        if (window.syncStudentToCloud) {
+                            window.syncStudentToCloud(key, imported);
+                        }
+                        // Limpa parâmetro da URL e abre direto o login do ADM para você ver a nota
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        openAdminLoginModal();
+                    }
                 }
             } catch (e) {
-                console.warn("Erro ao carregar banco de alunos:", e);
-                studentsDB = {};
+                console.warn("Erro ao ler entrega da URL:", e);
+            }
+        }
+
+        function encodeSubmissionPayload(studentObj) {
+            const minimal = {
+                n: studentObj.name,
+                c: studentObj.className || "Geral",
+                u: studentObj.updatedAt || new Date().toISOString(),
+                a: {}
+            };
+            Object.keys(studentObj.answers || {}).forEach(qId => {
+                const ans = studentObj.answers[qId];
+                minimal.a[qId] = { p: ans.prompt, s: ans.score };
+            });
+            const jsonStr = JSON.stringify(minimal);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+            return `PROMPTS-${base64}`;
+        }
+
+        function decodeSubmissionPayload(rawCode) {
+            const clean = rawCode.trim().replace(/^PROMPTS-/, "");
+        function copyShareableLinkForTeacher() {
+            saveStudentsDatabase();
+            const currentObj = {
+                name: state.studentName || "Aluno(a)",
+                className: state.studentClass || "Geral",
+                answers: state.answers,
+                updatedAt: new Date().toISOString()
+            };
+            const code = encodeSubmissionPayload(currentObj);
+            const baseUrl = window.location.origin + window.location.pathname;
+            const fullLink = `${baseUrl}?entrega=${encodeURIComponent(code)}`;
+
+            const tempInput = document.createElement("textarea");
+            tempInput.value = fullLink;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            const btnText = document.getElementById("copyLinkBtnText");
+            btnText.textContent = "Link Copiado! Cole no WhatsApp";
+            setTimeout(() => {
+                btnText.textContent = "Copiar Link de Entrega";
+            }, 3000);
+        }
+
+        function copySubmissionCodeForTeacher() {
+            saveStudentsDatabase();
+            const currentObj = {
+                name: state.studentName || "Aluno(a)",
+                className: state.studentClass || "Geral",
+                answers: state.answers,
+                updatedAt: new Date().toISOString()
+            };
+            const code = encodeSubmissionPayload(currentObj);
+
+            const tempInput = document.createElement("textarea");
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            const btnText = document.getElementById("copySubmissionBtnText");
+            btnText.textContent = "Código Copiado! Envie ao Prof.";
+            setTimeout(() => {
+                btnText.textContent = "Copiar Código p/ Professor";
+            }, 3000);
+        }
+
+        function openImportStudentModal() {
+            document.getElementById("importCodeTextarea").value = "";
+            document.getElementById("importFeedbackMsg").classList.add("hidden");
+            document.getElementById("importStudentModal").classList.remove("hidden");
+            setTimeout(() => document.getElementById("importCodeTextarea").focus(), 100);
+            lucide.createIcons();
+        }
+
+        function closeImportStudentModal() {
+            document.getElementById("importStudentModal").classList.add("hidden");
+        }
+
+        function processStudentImportCode() {
+            const raw = document.getElementById("importCodeTextarea").value.trim();
+            const msgBox = document.getElementById("importFeedbackMsg");
+
+            if (!raw) {
+                msgBox.className = "bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl";
+                msgBox.textContent = "Cole o código enviado pelo aluno antes de importar.";
+                msgBox.classList.remove("hidden");
+                return;
+            }
+
+            try {
+                // Aceita tanto o código puro quanto um link completo contendo ?entrega=...
+                let codeToDecode = raw;
+                if (raw.includes("entrega=")) {
+                    const urlObj = new URL(raw);
+                    codeToDecode = urlObj.searchParams.get("entrega") || raw;
+                }
+
+                const studentRecord = decodeSubmissionPayload(codeToDecode);
+                if (!studentRecord) throw new Error("Formato inválido");
+
+                const key = normalizeStudentKey(studentRecord.name);
+                studentsDB[key] = studentRecord;
+                localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
+
+                renderAdminDashboard();
+                closeImportStudentModal();
+            } catch (e) {
+                msgBox.className = "bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl";
+                msgBox.textContent = "Código inválido ou incompleto. Peça para o aluno clicar em 'Copiar Código p/ Professor' no Boletim.";
+                msgBox.classList.remove("hidden");
             }
         }
 
         function saveStudentsDatabase() {
             try {
                 if (activeStudentKey && state.studentName) {
-                    studentsDB[activeStudentKey] = {
+                    const record = {
                         name: state.studentName,
                         className: state.studentClass || "Geral",
                         currentIndex: state.currentIndex,
                         answers: state.answers,
                         updatedAt: new Date().toISOString()
                     };
+                    studentsDB[activeStudentKey] = record;
+                    if (window.syncStudentToCloud) {
+                        window.syncStudentToCloud(activeStudentKey, record);
+                    }
                 }
                 localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(studentsDB));
             } catch (e) {
@@ -1544,6 +1858,9 @@
 
         function deleteSingleStudent(studentKey) {
             delete studentsDB[studentKey];
+            if (window.deleteStudentFromCloud) {
+                window.deleteStudentFromCloud(studentKey);
+            }
             if (activeStudentKey === studentKey) {
                 activeStudentKey = null;
                 state.answers = {};
